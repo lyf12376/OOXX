@@ -10,7 +10,7 @@ interface GameTimeRankDao {
     fun insertGameTimeRank(gameTimeRank: GameTimeRank)
 
     @Query("SELECT * FROM GameTimeRank")
-    fun getGameTimeRankByRank(rank: Int): List<GameTimeRank>
+    fun getGameTimeRank(rank: Int): List<GameTimeRank>
 
     @Query("update GameTimeRank set userName = :userName, time = :time where rank = :rank")
     fun updateGameTimeRankByRank(rank: Int, userName: String, time: String)

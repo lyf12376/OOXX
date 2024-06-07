@@ -6,17 +6,17 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 @Database(entities = [WorldBestRecord::class], version = 1)
-abstract class WordBestRecordDatabase : RoomDatabase(){
-    abstract fun wordBestRecordDao(): WordBestRecordDao
+abstract class WorldBestRecordDatabase : RoomDatabase(){
+    abstract fun wordBestRecordDao(): WorldBestRecordDao
 
     companion object{
         @Volatile
-        private var INSTANCE: WordBestRecordDatabase? = null
-        fun getDatabase(context: Context): WordBestRecordDatabase{
+        private var INSTANCE: WorldBestRecordDatabase? = null
+        fun getDatabase(context: Context): WorldBestRecordDatabase{
             return INSTANCE ?: synchronized(this){
                 val instance = Room.databaseBuilder(
                     context.applicationContext,
-                    WordBestRecordDatabase::class.java,
+                    WorldBestRecordDatabase::class.java,
                     "WorldBestRecord"
                 ).build()
                 INSTANCE = instance

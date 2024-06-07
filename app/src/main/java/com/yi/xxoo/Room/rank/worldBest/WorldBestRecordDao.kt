@@ -5,7 +5,7 @@ import androidx.room.Insert
 import androidx.room.Query
 
 @Dao
-interface WordBestRecordDao {
+interface WorldBestRecordDao {
     @Insert
     fun insertWorldBestRecord(worldBestRecord: WorldBestRecord)
 
