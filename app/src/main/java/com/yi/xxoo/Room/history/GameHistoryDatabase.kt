@@ -4,8 +4,9 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.yi.xxoo.Room.user.User
 
-@Database(entities = [GameHistory::class], version = 1)
+@Database(entities = [ GameHistory::class, User::class ], version = 1, exportSchema = false)
 abstract class GameHistoryDatabase : RoomDatabase(){
     abstract fun gameHistoryDao(): GameHistoryDao
 
