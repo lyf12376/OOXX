@@ -7,7 +7,6 @@ import androidx.room.PrimaryKey
 data class Game(
     @PrimaryKey(autoGenerate = true)
     val id : Long = 0,
-    val difficulty : Int,
     val init:String,
     val target:String,
 )

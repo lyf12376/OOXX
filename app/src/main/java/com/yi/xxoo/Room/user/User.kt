@@ -5,11 +5,10 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "User",
-    primaryKeys = ["account"]
+    primaryKeys = ["email"]
 )
 data class User(
     val name : String,
-    val account : String,//即为邮箱
     val password : String,
     val email : String,
     //头像存储路径
