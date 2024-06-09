@@ -31,12 +31,10 @@ class GameViewModel @Inject constructor(
         }
     }
 
-    // 假设 getAllGames() 是挂起函数
     private suspend fun getAllGames(): List<Game> {
         return gameDao.getAllGames()
     }
-
-    // 不变的getWorldBestRecord()方法
+    
     fun getWorldBestRecord(): Flow<List<WorldBestRecord>> {
         return worldBestRecordDao.getWorldBestRecordByGame()
     }
