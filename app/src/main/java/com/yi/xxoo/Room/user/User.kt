@@ -12,6 +12,7 @@ data class User(
     val account : String,//即为邮箱
     val password : String,
     val email : String,
+    val coin:Int,
     //头像存储路径
     val photo : String,
     //成就

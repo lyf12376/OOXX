@@ -8,4 +8,6 @@ sealed class Screen(val route:String, val description:String){
     object GamePage : Screen("GamePage", "游戏")
 
     object MinePage : Screen("MinePage", "我的")
+
+    object RegisterPage : Screen("RegisterPage", "注册")
 }

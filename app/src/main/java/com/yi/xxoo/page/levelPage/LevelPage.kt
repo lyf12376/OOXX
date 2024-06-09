@@ -17,6 +17,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +42,7 @@ import kotlinx.coroutines.launch
 fun LevelPage() {
     Column {
         LevelSelectionScreen()
+        Divider()
     }
 }
 
@@ -156,6 +158,40 @@ fun LevelSelectionScreen() {
             modifier = Modifier
                 .padding(16.dp)
         )
+    }
+}
+
+@Composable
+@Preview
+fun navigation()
+{
+    Row {
+        Column {
+            Icon(
+                painterResource(id = R.drawable.game_selected),
+                contentDescription = "Previous Level",
+                modifier = Modifier
+                    .size(48.dp)
+                    .clickable {
+
+                    },
+                tint = Color.Unspecified
+            )
+            Text(text = "游戏", fontSize = 20.sp)
+        }
+        Column {
+            Icon(
+                painterResource(id = R.drawable.mine),
+                contentDescription = "我的",
+                modifier = Modifier
+                    .size(48.dp)
+                    .clickable {
+
+                    },
+                tint = Color.Unspecified
+            )
+            Text(text = "我的", fontSize = 20.sp)
+        }
     }
 }
 

@@ -11,6 +11,8 @@ import com.yi.xxoo.Room.rank.time.GameTimeRankDao
 import com.yi.xxoo.Room.rank.time.GameTimeRankDatabase
 import com.yi.xxoo.Room.rank.worldBest.WorldBestRecordDao
 import com.yi.xxoo.Room.rank.worldBest.WorldBestRecordDatabase
+import com.yi.xxoo.Room.savedUser.SavedUserDao
+import com.yi.xxoo.Room.savedUser.SavedUserDatabase
 import com.yi.xxoo.Room.user.UserDao
 import com.yi.xxoo.Room.user.UserDatabase
 import dagger.Module
@@ -73,26 +75,38 @@ object AppModule {
 
     @Singleton
     @Provides
-    fun getWorldBestRecordDatabase(database: WorldBestRecordDatabase): WorldBestRecordDatabase {
-        return database
+    fun provideWorldBestRecordDatabase(@ApplicationContext context: Context): WorldBestRecordDatabase {
+        return WorldBestRecordDatabase.getDatabase(context)
     }
 
     @Singleton
     @Provides
-    fun getWorldBestRecordDao(database: WorldBestRecordDatabase): WorldBestRecordDao {
+    fun provideWorldBestRecordDao(database: WorldBestRecordDatabase): WorldBestRecordDao {
         return database.wordBestRecordDao()
     }
 
     @Singleton
     @Provides
-    fun getGameHistoryDatabase(database: GameHistoryDatabase): GameHistoryDatabase {
-        return database
+    fun provideGameHistoryDatabase(@ApplicationContext context: Context): GameHistoryDatabase {
+        return GameHistoryDatabase.getDatabase(context)
     }
 
     @Singleton
     @Provides
-    fun getGameHistoryDao(database: GameHistoryDatabase): GameHistoryDao {
+    fun provideGameHistoryDao(database: GameHistoryDatabase): GameHistoryDao {
         return database.gameHistoryDao()
+    }
+
+    @Singleton
+    @Provides
+    fun provideSavedUserDatabase(@ApplicationContext context: Context): SavedUserDatabase {
+        return SavedUserDatabase.getDatabase(context)
+    }
+
+    @Singleton
+    @Provides
+    fun provideSavedUserDao(database: SavedUserDatabase): SavedUserDao {
+        return database.savedUserDao()
     }
 
 

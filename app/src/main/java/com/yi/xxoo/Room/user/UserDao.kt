@@ -14,10 +14,13 @@ interface UserDao {
     fun getUserByEmail(email: String): User
 
     @Query("SELECT * FROM User WHERE name = :name and password = :password")
-    fun login(name: String,password: String): User
+    fun login(name: String,password: String): User?
 
     @Update
     fun updateUser(user: User)
+
+    @Query("UPDATE User SET coin = :coin WHERE email = :email")
+    fun updateUserCoin(email: String, coin: Int)
 
     @Query("UPDATE User SET name = :name WHERE email = :email")
     fun updateUserName(email: String, name: String)
