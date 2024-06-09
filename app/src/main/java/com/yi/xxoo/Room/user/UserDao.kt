@@ -39,4 +39,7 @@ interface UserDao {
 
     @Query("UPDATE User SET time = :time WHERE email = :email")
     fun updateUserTime(email: String, time: Int)
+
+    @Query("SELECT bestRecord FROM User WHERE email = :email")
+    fun getUserBestRecord(email: String): String
 }
