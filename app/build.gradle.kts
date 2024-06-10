@@ -98,6 +98,15 @@ dependencies {
     implementation ("com.google.accompanist:accompanist-systemuicontroller:0.31.0-alpha")
     implementation("com.google.accompanist:accompanist-permissions:0.31.0-alpha")
 
+    implementation("io.github.mr0xf00:easycrop:0.1.1")
 
+    implementation("io.coil-kt:coil-compose:2.2.2")
+
+    //retrofit
+    implementation("com.squareup.okhttp3:okhttp-bom:4.11.0")
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp")
+    implementation("com.squareup.okhttp3:logging-interceptor")
 
 }

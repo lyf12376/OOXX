@@ -2,7 +2,7 @@ package com.yi.xxoo.Const
 
 import com.yi.xxoo.Room.user.User
 
-object User {
+object UserData {
     var name : String = ""
     var account : String = ""
     var password : String = ""

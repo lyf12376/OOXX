@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.yi.xxoo.Const.User
+import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
 import com.yi.xxoo.Room.savedUser.SavedUser
 import com.yi.xxoo.navigation.Screen
@@ -292,7 +292,7 @@ fun LoginPage(
                                 val savedUser = SavedUser(account = account, password = password)
                                 loginViewModel.saveUser(savedUser)
                             }
-                            User.setUser(user)
+                            UserData.setUser(user)
                         } else {
                             showDialog = true
                         }

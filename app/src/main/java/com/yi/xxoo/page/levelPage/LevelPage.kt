@@ -43,6 +43,7 @@ fun LevelPage() {
     Column {
         LevelSelectionScreen()
         Divider()
+        navigation()
     }
 }
 

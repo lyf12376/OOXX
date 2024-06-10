@@ -1,4 +1,4 @@
-package com.Yi.videoplayer.utils.pictrueUtils
+package com.yi.xxoo.utils.pictrueUtils
 
 import android.Manifest
 import android.os.Build
@@ -11,9 +11,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import com.example.roomtest.pictrue.PictureResult
-import com.example.roomtest.pictrue.SelectPicture
-import com.example.roomtest.pictrue.TakePhoto
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -69,7 +66,7 @@ class PhotoComponent {
      **/
     @OptIn(ExperimentalPermissionsApi::class)
     @Composable
-    fun Register(
+    fun SelectImage(
         galleryCallback: (selectResult: PictureResult) -> Unit,
         graphCallback: (graphResult: PictureResult) -> Unit,
         permissionRationale: ((gallery: Boolean) -> Unit)? = null,
