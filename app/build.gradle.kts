@@ -100,7 +100,8 @@ dependencies {
 
     implementation("io.github.mr0xf00:easycrop:0.1.1")
 
-    implementation("io.coil-kt:coil-compose:2.2.2")
+    implementation("io.coil-kt:coil-compose:2.6.0")
+    implementation("io.coil-kt:coil-gif:2.6.0")
 
     //retrofit
     implementation("com.squareup.okhttp3:okhttp-bom:4.11.0")

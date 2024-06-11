@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
@@ -35,15 +36,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.toColorInt
 import com.yi.xxoo.R
 import kotlinx.coroutines.launch
 
 @Composable
 fun LevelPage() {
-    Column {
+    Column (modifier = Modifier.navigationBarsPadding()){
         LevelSelectionScreen()
-        Divider()
-        navigation()
     }
 }
 
@@ -159,14 +159,15 @@ fun LevelSelectionScreen() {
             modifier = Modifier
                 .padding(16.dp)
         )
+        LevelPageNavigation()
     }
 }
 
 @Composable
 @Preview
-fun navigation()
+fun LevelPageNavigation()
 {
-    Row {
+    Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround){
         Column {
             Icon(
                 painterResource(id = R.drawable.game_selected),
