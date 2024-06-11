@@ -12,4 +12,10 @@ sealed class Screen(val route:String, val description:String){
     object RegisterPage : Screen("RegisterPage", "注册")
 
     object DocumentPage : Screen("DocumentPage/{account}", "资料")
+
+    object AchievementPage : Screen("AchievementPage","成就")
+
+    object StatisticPage : Screen("StatisticPage","数据")
+
+    object RankPage:Screen("RankPage","排名")
 }

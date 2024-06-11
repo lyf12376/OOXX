@@ -37,20 +37,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
+import androidx.navigation.NavController
 import com.yi.xxoo.R
 import kotlinx.coroutines.launch
 
 @Composable
-fun LevelPage() {
+fun LevelPage(navController: NavController) {
     Column (modifier = Modifier.navigationBarsPadding()){
-        LevelSelectionScreen()
+        LevelSelectionScreen(navController)
     }
 }
 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LevelSelectionScreen() {
+fun LevelSelectionScreen(navController: NavController) {
     val pagerState = rememberPagerState(
         initialPage = 0,
         initialPageOffsetFraction = 0f
@@ -159,13 +160,14 @@ fun LevelSelectionScreen() {
             modifier = Modifier
                 .padding(16.dp)
         )
-        LevelPageNavigation()
+        LevelPageNavigation{
+            navController.navigate("MinePage")
+        }
     }
 }
 
 @Composable
-@Preview
-fun LevelPageNavigation()
+fun LevelPageNavigation(unit:()->Unit)
 {
     Row (modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround){
         Column {
@@ -173,10 +175,7 @@ fun LevelPageNavigation()
                 painterResource(id = R.drawable.game_selected),
                 contentDescription = "Previous Level",
                 modifier = Modifier
-                    .size(48.dp)
-                    .clickable {
-
-                    },
+                    .size(48.dp),
                 tint = Color.Unspecified
             )
             Text(text = "游戏", fontSize = 20.sp)
@@ -188,17 +187,11 @@ fun LevelPageNavigation()
                 modifier = Modifier
                     .size(48.dp)
                     .clickable {
-
+                        unit()
                     },
                 tint = Color.Unspecified
             )
             Text(text = "我的", fontSize = 20.sp)
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    LevelSelectionScreen()
 }

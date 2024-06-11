@@ -27,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.yi.xxoo.R
 
 object MySize {
@@ -39,28 +40,40 @@ object MySize {
 }
 
 @Composable
-fun MinePage() {
+fun MinePage(navController: NavController) {
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .background(Color(0xFFF0F0F0))
                 .fillMaxSize()
         ) {
-            photo()
+            photo {
+
+            }
             Spacer(modifier = Modifier.height(32.dp))
-            achievement()
+            achievement {
+                navController.navigate("AchievementPage")
+            }
             Divider()
-            statistics()
+            statistics {
+                navController.navigate("StatisticPage")
+            }
             Divider()
-            rank()
+            rank {
+                navController.navigate("RankPage")
+            }
         }
-        MinePageNavigation(Modifier.align(Alignment.BottomCenter).background(Color.White))
+        MinePageNavigation(
+            Modifier
+                .align(Alignment.BottomCenter)
+                .background(Color.White)){
+            navController.navigate("LevelPage")
+        }
     }
 }
 
 @Composable
-@Preview
-fun photo() {
+fun photo(unit:()->Unit) {
     Row (modifier = Modifier
         .background(Color.White)
         .fillMaxWidth()) {
@@ -78,12 +91,14 @@ fun photo() {
 }
 
 @Composable
-@Preview
-fun achievement() {
+fun achievement(unit:()->Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
+            .clickable {
+                unit()
+            }
     ) {
         Image(
             painterResource(id = R.drawable.achievement),
@@ -111,12 +126,14 @@ fun achievement() {
 }
 
 @Composable
-@Preview
-fun statistics() {
+fun statistics(unit:()->Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
+            .clickable {
+                unit()
+            }
     ) {
         Image(
             painterResource(id = R.drawable.statistic),
@@ -144,13 +161,15 @@ fun statistics() {
 }
 
 @Composable
-@Preview
-fun rank()
+fun rank(unit:()->Unit)
 {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.White)
+            .clickable {
+                unit()
+            }
     ) {
         Image(
             painterResource(id = R.drawable.rank),
@@ -178,7 +197,7 @@ fun rank()
 
 }
 @Composable
-fun MinePageNavigation(modifier: Modifier)
+fun MinePageNavigation(modifier: Modifier,unit:()->Unit)
 {
     Row (modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround){
         Column {
@@ -188,7 +207,7 @@ fun MinePageNavigation(modifier: Modifier)
                 modifier = Modifier
                     .size(48.dp)
                     .clickable {
-
+                        unit()
                     },
                 tint = Color.Unspecified
             )
@@ -211,8 +230,3 @@ fun MinePageNavigation(modifier: Modifier)
 }
 
 
-@Composable
-@Preview
-fun p() {
-    MinePage()
-}

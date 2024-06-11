@@ -21,6 +21,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,14 +36,14 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.yi.xxoo.R
 import com.yi.xxoo.page.loginPage.noRippleClickable
 import com.yi.xxoo.utils.GifImage
 import kotlinx.coroutines.launch
 
 @Composable
-@Preview
-fun StatisticPage() {
+fun StatisticPage(navController: NavController) {
 
     Box(modifier = Modifier
         .fillMaxSize()
@@ -61,16 +62,16 @@ fun StatisticPage() {
                 .fillMaxWidth()
                 .background(Color.Transparent)
         ) {
-            Icon(
-                imageVector = Icons.Default.ArrowBack,
-                contentDescription = "退出",
-                modifier = Modifier
-                    .padding(18.dp)
-                    .size(36.dp)
-                    .clickable {
-                        // 返回上一页
-                    }
-            )
+            IconButton(onClick = { navController.popBackStack()},modifier = Modifier
+                .padding(18.dp)
+                .size(36.dp)) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "退出",
+                    modifier = Modifier
+                        .size(36.dp)
+                )
+            }
             Text(
                 text = "数据统计", modifier = Modifier
                     .padding(18.dp)
