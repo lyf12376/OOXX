@@ -5,7 +5,7 @@ sealed class Screen(val route:String, val description:String){
 
     object LevelPage : Screen("LevelPage", "关卡")
 
-    object GamePage : Screen("GamePage", "游戏")
+    object GamePage : Screen("GamePage/{level}", "游戏")
 
     object MinePage : Screen("MinePage", "我的")
 

@@ -3,15 +3,16 @@ package com.yi.xxoo.Room.game
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface GameDao {
     @Insert
-    fun createGame(game: Game): Long
+    suspend fun createGame(game: Game): Long
 
     @Query("SELECT * FROM Game WHERE id = :id")
-    fun getGameById(id: Long): Game
+    suspend fun getGameById(id: Long): Game
 
     @Query("SELECT * FROM Game")
-    fun getAllGames(): List<Game>
+    fun getAllGames(): Flow<List<Game>>
 }

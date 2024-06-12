@@ -11,4 +11,6 @@ object GameUtils {
             input.substring(i * n, (i + 1) * n).toList()
         }
     }
+
+
 }

@@ -7,11 +7,11 @@ import androidx.room.Query
 @Dao
 interface GameTimeRankDao {
     @Insert
-    fun insertGameTimeRank(gameTimeRank: GameTimeRank)
+    suspend fun insertGameTimeRank(gameTimeRank: GameTimeRank)
 
     @Query("SELECT * FROM GameTimeRank")
-    fun getGameTimeRank(): List<GameTimeRank>
+    suspend fun getGameTimeRank(): List<GameTimeRank>
 
     @Query("update GameTimeRank set userName = :userName, time = :time where rank = :rank")
-    fun updateGameTimeRankByRank(rank: Int, userName: String, time: String)
+    suspend fun updateGameTimeRankByRank(rank: Int, userName: String, time: String)
 }

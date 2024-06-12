@@ -100,7 +100,7 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
                 contentDescription = "返回",
                 Modifier
                     .padding(start = 16.dp)
-                    .clickable { navController.navigate("start") }
+                    .clickable { navController.navigate("LoginPage") }
             )
             Box(
                 modifier = Modifier

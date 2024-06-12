@@ -18,7 +18,7 @@ class LoginViewModel @Inject constructor(private val savedUserDao: SavedUserDao,
         return userDao.login(account, password)
     }
 
-    fun saveUser(savedUser: SavedUser) {
+    suspend fun saveUser(savedUser: SavedUser) {
         savedUserDao.saveUsers(savedUser)
     }
 
@@ -26,7 +26,7 @@ class LoginViewModel @Inject constructor(private val savedUserDao: SavedUserDao,
         return savedUserDao.getSavedUsers()
     }
 
-    fun deleteUser(account: String) {
+    suspend fun deleteUser(account: String) {
         savedUserDao.unRemember(account)
     }
 }

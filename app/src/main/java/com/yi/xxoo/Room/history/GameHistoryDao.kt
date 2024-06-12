@@ -7,8 +7,8 @@ import androidx.room.Query
 @Dao
 interface GameHistoryDao {
     @Insert
-    fun insertGameHistory(gameHistory: GameHistory)
+    suspend fun insertGameHistory(gameHistory: GameHistory)
 
     @Query("SELECT * FROM GameHistory WHERE userAccount = :userAccount")
-    fun getGameHistory(userAccount:String): List<GameHistory>
+    suspend fun getGameHistory(userAccount:String): List<GameHistory>
 }

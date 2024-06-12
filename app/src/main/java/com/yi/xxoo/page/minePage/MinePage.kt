@@ -19,6 +19,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -27,8 +28,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.yi.xxoo.R
+import kotlinx.coroutines.launch
 
 object MySize {
     val photoSize = 72.dp
@@ -40,7 +43,11 @@ object MySize {
 }
 
 @Composable
-fun MinePage(navController: NavController) {
+fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltViewModel()) {
+    val coroutineScope = rememberCoroutineScope()
+    coroutineScope.launch {
+        mineViewModel.getUserData()
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier

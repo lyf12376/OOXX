@@ -149,7 +149,7 @@ fun LevelSelectionScreen(navController: NavController) {
             modifier = Modifier
                 .size(80.dp)
                 .clickable {
-                    //TODO: Start the game
+                    navController.navigate("GamePage/${pagerState.currentPage + 1}")
                 })
 
         // Record at the bottom

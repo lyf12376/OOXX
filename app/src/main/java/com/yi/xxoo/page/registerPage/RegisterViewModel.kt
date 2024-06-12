@@ -9,11 +9,11 @@ import javax.inject.Inject
 @HiltViewModel
 class RegisterViewModel @Inject constructor(private val userDao: UserDao) : ViewModel(){
 
-    fun register(account: String, password: String) {
+    suspend fun register(account: String, password: String) {
         userDao.createUser(User("name",account,password,account,photo = ""))
     }
 
-    fun updatePersonalInformation(account: String, name: String, photo: String) {
+    suspend fun updatePersonalInformation(account: String, name: String, photo: String) {
         userDao.updateUserName(account,name)
         userDao.updateUserPhoto(account,photo)
     }

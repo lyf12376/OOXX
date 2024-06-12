@@ -1,6 +1,7 @@
 package com.yi.xxoo.Const
 
 import com.yi.xxoo.Room.user.User
+import com.yi.xxoo.utils.RoomUtils.stringToPersonalBestRecord
 
 object UserData {
     var name : String = ""
@@ -13,7 +14,7 @@ object UserData {
     var level : Int = 0
     var gameTimes : Int = 0
     var time : Int = 0
-    var bestRecord: String = ""
+    var bestRecord: ArrayList<Int> = arrayListOf()
     var passNum:Int = 0
 
     fun setUser(userData: User) {
@@ -27,7 +28,7 @@ object UserData {
         level = userData.level
         gameTimes = userData.gameTimes
         time = userData.time
-        bestRecord = userData.bestRecord
+        bestRecord = userData.bestRecord.stringToPersonalBestRecord()
         passNum = userData.passNum
     }
 }

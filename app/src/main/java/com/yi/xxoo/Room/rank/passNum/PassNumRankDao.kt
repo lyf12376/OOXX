@@ -7,12 +7,12 @@ import androidx.room.Query
 @Dao
 interface PassNumRankDao {
     @Insert
-    fun insert(passNumRank: PassNumRank)
+    suspend fun insert(passNumRank: PassNumRank)
 
     @Query("SELECT * FROM passNumRank")
-    fun getPassNumRank(): List<PassNumRank>
+    suspend fun getPassNumRank(): List<PassNumRank>
 
     @Query("update passNumRank set userName = :userName, passNum = :passNum where rank = :rank")
-    fun updatePassNumRankByRank(rank: Int, userName: String, passNum: String)
+    suspend fun updatePassNumRankByRank(rank: Int, userName: String, passNum: String)
 
 }

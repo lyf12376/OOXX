@@ -30,8 +30,11 @@ fun NavigationGraph(
         composable(Screen.MinePage.route){
             MinePage(navHostController)
         }
-        composable(Screen.GamePage.route){
-            GamePage()
+        composable(
+            Screen.GamePage.route,
+            arguments = listOf(navArgument("level"){type = NavType.IntType})
+        ){
+            GamePage(navHostController,level = it.arguments?.getInt("level") ?: 0)
         }
         composable(Screen.LoginPage.route){
             LoginPage(navHostController)
