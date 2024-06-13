@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.yi.xxoo.navigation.NavigationGraph
 import com.yi.xxoo.ui.theme.XxooTheme
+import com.yi.xxoo.utils.getScreenData
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -28,6 +29,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val navController = rememberNavController()
             TransparentSystemBars()
+            getScreenData()
             NavigationGraph(navHostController = navController)
         }
     }

@@ -6,6 +6,7 @@ import androidx.room.Query
 import androidx.room.TypeConverters
 import androidx.room.Update
 import com.yi.xxoo.Room.converter.UserConverters
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UserDao {
@@ -48,6 +49,15 @@ interface UserDao {
     @Query("UPDATE UserData SET bestRecord = :bestRecord WHERE email = :email")
     suspend fun updateBestRecordByEmail(email: String, bestRecord: String)
 
+    @Query("UPDATE USERDATA SET passNum = :passNum WHERE email = :email")
+    suspend fun updateUserPassNum(passNum:Int,email: String)
+
     @Query("SELECT bestRecord FROM UserData WHERE email = :email")
     suspend fun getUserBestRecord(email: String): String
+
+    @Query("select coin from UserData where email = :email")
+    fun getUserCoin(email: String): Flow<Int>
+
+    @Query("select passNum from UserData where email = :email")
+    fun getUserPassNum(email: String): Flow<Int>
 }

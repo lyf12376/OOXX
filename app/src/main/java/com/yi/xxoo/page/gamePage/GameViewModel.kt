@@ -1,5 +1,7 @@
 package com.yi.xxoo.page.gamePage
 
+import android.content.Context
+import android.media.SoundPool
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
@@ -7,12 +9,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yi.xxoo.Const.UserData
+import com.yi.xxoo.R
 import com.yi.xxoo.Room.game.Game
 import com.yi.xxoo.Room.game.GameDao
 import com.yi.xxoo.Room.rank.worldBest.WorldBestRecord
 import com.yi.xxoo.Room.rank.worldBest.WorldBestRecordDao
 import com.yi.xxoo.Room.user.UserDao
 import com.yi.xxoo.utils.RoomUtils.personalBestRecordToString
+import com.yi.xxoo.utils.SoundManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +35,7 @@ class GameViewModel @Inject constructor(
     private var gameList : Flow<List<Game>> = getAllGames()
     //val gameList: List<Game> get() = _gameList
     val personalBest = UserData.bestRecord
+
 
 
     //游戏内容
@@ -75,8 +80,15 @@ class GameViewModel @Inject constructor(
                     Log.d("TAG", "check: success")
                     userDao.updateBestRecordByEmail(UserData.email,UserData.bestRecord.personalBestRecordToString())
                     _gameSuccess.value = true
+
                 }else{
                     _gameSuccess.value = true
+                }
+                if (UserData.passNum == level-1){
+                    userDao.updateUserPassNum(level,UserData.email)
+                    UserData.passNum = level
+                    userDao.updateUserCoin(UserData.email,UserData.coin+10)
+                    UserData.coin += 10
                 }
 
             }
@@ -84,4 +96,23 @@ class GameViewModel @Inject constructor(
 
     }
 
+    fun loadMusic(context: Context,musicId:Int)
+    {
+        SoundManager.loadSound(context,musicId)
+    }
+
+    fun playMusic()
+    {
+        SoundManager.playSound()
+    }
+
+    fun releaseMusic()
+    {
+        SoundManager.release()
+    }
+
+
+
+
 }
+

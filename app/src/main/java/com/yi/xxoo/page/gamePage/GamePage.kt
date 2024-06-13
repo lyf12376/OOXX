@@ -1,10 +1,14 @@
 package com.yi.xxoo.page.gamePage
 
 import android.util.Log
+import androidx.compose.animation.Animatable
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,6 +20,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -45,14 +50,21 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
+import com.yi.xxoo.Const.ScreenData
 import com.yi.xxoo.Const.UserData
+import com.yi.xxoo.R
 import com.yi.xxoo.Room.game.Game
 import com.yi.xxoo.utils.GameUtils
 import kotlinx.coroutines.delay
@@ -61,12 +73,13 @@ import kotlinx.coroutines.launch
 @Composable
 fun GamePage(navController: NavController,level:Int,gameViewModel: GameViewModel = hiltViewModel()) {
     val gameDetail by gameViewModel.gameDetail.collectAsState()
-    val coroutineScope = rememberCoroutineScope()
     val gameSuccess by gameViewModel.gameSuccess.collectAsState()
+    val context = LocalContext.current
 
     // 调用getGame获取指定等级的游戏信息
     LaunchedEffect(level) {
         gameViewModel.getGame(level)
+        gameViewModel.loadMusic(context, R.raw.win)
     }
     gameViewModel.target = gameDetail?.target ?: ""
 
@@ -161,10 +174,16 @@ fun GamePage(navController: NavController,level:Int,gameViewModel: GameViewModel
         }
 
     }
+
     Box {
         GameSuccessAnimation(modifier = Modifier
             .fillMaxSize()
-            .clickable { navController.popBackStack() }, visible = gameSuccess)
+            .clickable { navController.popBackStack() }, visible = gameSuccess,
+        playMusic = {
+            gameViewModel.playMusic()
+        }){
+            gameViewModel.releaseMusic()
+        }
     }
 }
 
@@ -173,6 +192,7 @@ fun GameGrid(game: Game?,now: MutableState<MutableList<MutableList<Char>>>) {
     val game = game ?: return
     val init = GameUtils.expandStringToNxNList(game.init)
     val gridSize = init.size // 从init确定的网格尺寸
+    val recSize = ((ScreenData.screenWidthDp.value - 16) - (gridSize) * 2) / (gridSize + 1) // 每个单元格的尺寸
 
     // 从游戏初始化状态计算行和列的计数
     val rowCountX by remember { derivedStateOf { now.value.map { row -> row.count { it == 'X' } }.toIntArray() } }
@@ -188,6 +208,25 @@ fun GameGrid(game: Game?,now: MutableState<MutableList<MutableList<Char>>>) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
+            .drawBehind {
+                val cellSize = size.width / (gridSize + 1)
+                for (i in 0 until gridSize + 2) {
+                    // 画竖线
+                    drawLine(
+                        color = Color.Black,
+                        start = Offset(x = cellSize * i, y = 0f),
+                        end = Offset(x = cellSize * i, y = cellSize * (gridSize + 1)),
+                        strokeWidth = 3f
+                    )
+                    // 画横线
+                    drawLine(
+                        color = Color.Black,
+                        start = Offset(x = 0f, y = cellSize * i),
+                        end = Offset(x = size.width, y = cellSize * i),
+                        strokeWidth = 3f
+                    )
+                }
+            }
     ) {
         items((gridSize + 1) * (gridSize + 1)) { index ->
             Log.d("TAG", "GameGrid: $index")
@@ -199,9 +238,8 @@ fun GameGrid(game: Game?,now: MutableState<MutableList<MutableList<Char>>>) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
+                        .size(recSize.dp)
                         .padding(paddingValues)
-                        .size(50.dp)
-                        .background(Color.LightGray)
                 ) {
                     Row (modifier = Modifier.fillMaxHeight()){
                         Text(
@@ -225,9 +263,8 @@ fun GameGrid(game: Game?,now: MutableState<MutableList<MutableList<Char>>>) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
+                        .size(recSize.dp)
                         .padding(paddingValues)
-                        .size(50.dp)
-                        .background(Color.LightGray)
                 ) {
                     val countX = if (col != 0) colCountX[col - 1] else rowCountX[row - 1]
                     val countO = if (col != 0) colCountO[col - 1] else rowCountO[row - 1]
@@ -254,9 +291,8 @@ fun GameGrid(game: Game?,now: MutableState<MutableList<MutableList<Char>>>) {
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
+                        .size(recSize.dp)
                         .padding(paddingValues)
-                        .size(50.dp)
-                        .background(Color.LightGray)
                         .clickable {
                             // 创建now列表的副本并修改
                             val newNow = now.value
@@ -328,7 +364,11 @@ fun Record(level: Int) {
                 .weight(1f)
         ) {
             Text(
-                text = "PB: ${UserData.bestRecord[level-1]}", fontSize = 20.sp, modifier = Modifier
+                text =
+                if (UserData.bestRecord.size < level) "PB: 等你创造记录"
+                else "PB: ${UserData.bestRecord[level-1]}",
+                fontSize = 20.sp,
+                modifier = Modifier
                     .padding(16.dp)
                     .alpha(0.5f)
                     .align(Alignment.Center)
@@ -338,21 +378,53 @@ fun Record(level: Int) {
 }
 
 @Composable
-fun GameSuccessAnimation(modifier: Modifier,visible: Boolean) {
+fun GameSuccessAnimation(modifier: Modifier, visible: Boolean,playMusic:()->Unit = {},release:()->Unit = {}) {
+    val scale = remember {
+        androidx.compose.animation.core.Animatable(1f)
+    }
+    // 对visible进行监听，如果变为true，则执行动画
+    LaunchedEffect(visible) {
+        if (visible) {
+            playMusic()
+            scale.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(
+                    durationMillis = 0
+                )
+            )
+            scale.animateTo(
+                targetValue = 1.2f,
+                animationSpec = tween(
+                    durationMillis = 400,
+                    easing = FastOutSlowInEasing
+                )
+            )
+            scale.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(
+                    durationMillis = 200,
+                    easing = FastOutSlowInEasing
+                )
+            )
+        }
+    }
     AnimatedVisibility(
         visible = visible,
-        enter = fadeIn() + scaleIn(),
-        exit = fadeOut()
+        enter = fadeIn(), // 进入时的动画，此处可以自定义
+        exit = fadeOut() // 退出时的动画，此处可以自定义
     ) {
-        // 这里是您的成功动画展示代码
-        Icon(
-            imageVector = Icons.Default.Check,
-            contentDescription = "Success",
-            modifier = modifier
-                .padding(16.dp),
-            tint = Color.Green
+        Box(
+            modifier = Modifier
+                .fillMaxSize() // 覆盖整个父容器
+                .background(Color.Gray.copy(alpha = 0.5f)) // 半透明灰色滤镜效果
         )
-        // 您可以根据需要替换成任何您喜欢的动画效果
+        Image(
+            painter = painterResource(id = R.drawable.win),
+            contentDescription = "胜利",
+            modifier = modifier
+                .fillMaxSize()
+                .scale(scale.value) // 应用缩放动画
+        )
     }
 }
 

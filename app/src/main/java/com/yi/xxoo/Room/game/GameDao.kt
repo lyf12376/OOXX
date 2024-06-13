@@ -15,4 +15,9 @@ interface GameDao {
 
     @Query("SELECT * FROM Game")
     fun getAllGames(): Flow<List<Game>>
+
+    @Query("select init from Game")
+    fun getGameInit(): Flow<List<String>>
+
+
 }
