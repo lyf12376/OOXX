@@ -9,14 +9,6 @@ import com.yi.xxoo.Room.user.User
 
 @Entity(
     tableName = "GameHistory",
-    foreignKeys = [
-        (ForeignKey(
-            entity = User::class,
-            parentColumns = arrayOf("account"),
-            childColumns = arrayOf("userAccount"),
-            onDelete = CASCADE
-        ))
-    ],
     indices = [
         Index(value = ["userAccount"])
     ]

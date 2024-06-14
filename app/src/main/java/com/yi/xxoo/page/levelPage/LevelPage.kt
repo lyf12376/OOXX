@@ -220,13 +220,14 @@ fun LevelSelectionScreen(navController: NavController,levelViewModel: LevelViewM
                 })
 
         // Record at the bottom
-        Text(
-            text = "Record: Highest Score",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier
-                .padding(16.dp)
-        )
+//        Text(
+//            text = "世界排行",
+//            fontSize = 20.sp,
+//            fontWeight = FontWeight.Bold,
+//            modifier = Modifier
+//                .padding(16.dp)
+//        )
+//        Image(painterResource(id = R.drawable.wb), contentDescription = "世界排行", modifier = Modifier.size(80.dp))
         LevelPageNavigation{
             navController.navigate("MinePage")
         }

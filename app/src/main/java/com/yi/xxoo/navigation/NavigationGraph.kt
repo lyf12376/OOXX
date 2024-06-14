@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.yi.xxoo.TransparentSystemBars
 import com.yi.xxoo.page.achievementPage.AchievementPage
 import com.yi.xxoo.page.documentPage.BasicMessage
 import com.yi.xxoo.page.gamePage.GameGrid
@@ -21,8 +22,9 @@ import com.yi.xxoo.page.statisticPage.StatisticPage
 @Composable
 fun NavigationGraph(
     navHostController: NavHostController,
-    startDestination: String = Screen.MinePage.route,
+    startDestination: String = Screen.LoginPage.route,
 ){
+
     NavHost(navController = navHostController, startDestination = startDestination){
         composable(Screen.LevelPage.route){
             LevelPage(navHostController)

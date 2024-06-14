@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -26,6 +27,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +56,7 @@ import androidx.navigation.NavController
 import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
 import com.yi.xxoo.Room.savedUser.SavedUser
+import com.yi.xxoo.TransparentSystemBars
 import com.yi.xxoo.navigation.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -90,7 +93,18 @@ fun LoginPage(
     val keyboardController = LocalSoftwareKeyboardController.current
     val savedUserList = loginViewModel.savedUserList.collectAsState(initial = emptyList())
 
-
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("错误") },
+            text = { Text("账号或密码错误，请重试。") },
+            confirmButton = {
+                Button(onClick = { showDialog = false }) {
+                    Text("确定")
+                }
+            }
+        )
+    }
     Box(
         Modifier
             .fillMaxSize()
@@ -298,15 +312,7 @@ fun LoginPage(
                         }
                     }
                     if (navigate) {
-                        scope1.launch {
-                            loginViewModel.saveUser(
-                                SavedUser(
-                                    account = account,
-                                    password = password
-                                )
-                            )
-                        }
-
+                        navController.navigate(Screen.MinePage.route)
                     }
                 }
 

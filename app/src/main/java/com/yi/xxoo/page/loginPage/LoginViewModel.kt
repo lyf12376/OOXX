@@ -18,6 +18,10 @@ class LoginViewModel @Inject constructor(private val savedUserDao: SavedUserDao,
         return userDao.login(account, password)
     }
 
+    suspend fun creatUser(){
+        userDao.createUser(User("name","account","password","account",photo = "",bestRecord = "123,45"))
+    }
+
     suspend fun saveUser(savedUser: SavedUser) {
         savedUserDao.saveUsers(savedUser)
     }

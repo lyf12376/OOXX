@@ -330,7 +330,6 @@ fun GameGrid(game: Game?,now: MutableState<MutableList<MutableList<Char>>>) {
 @Composable
 fun Timer(modifier: Modifier, time:Int) {
 
-
     // 显示时间的Text
     Box(modifier = modifier) {
         Text(

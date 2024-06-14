@@ -26,11 +26,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
 
 @Composable
 fun AchievementPage(navController: NavController)
 {
+    val isOneAchieved = UserData.achievement[0] == '1'
+    val isTwoAchieved = UserData.achievement[1] == '1'
+    val isThreeAchieved = UserData.achievement[2] == '1'
+
     Column (modifier = Modifier.fillMaxSize()){
         Row (modifier = Modifier.fillMaxWidth()){
             IconButton(onClick = { navController.popBackStack()},modifier = Modifier
@@ -52,17 +57,17 @@ fun AchievementPage(navController: NavController)
         Row (modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)){
-            AchievementItem(Modifier.weight(1f),R.drawable.time_achievement_gold, "时间刺客", "游玩时间超过十分钟")
+            AchievementItem(Modifier.weight(1f),R.drawable.time_achievement_gold, "时间刺客", "游玩时间超过十分钟", isOneAchieved)
         }
         Row (modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)){
-            AchievementItem(Modifier.weight(1f),R.drawable.achievement_pass,"通关达人","通关三次游戏")
+            AchievementItem(Modifier.weight(1f),R.drawable.achievement_pass,"通关达人","通关三次游戏", isTwoAchieved)
         }
         Row (modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)){
-            AchievementItem(Modifier.weight(1f),R.drawable.achievement_first,"一举夺魁","在世界排名获得一次第一名")
+            AchievementItem(Modifier.weight(1f),R.drawable.achievement_first,"一举夺魁","在世界排名获得一次第一名", isThreeAchieved)
         }
 
 
@@ -70,7 +75,7 @@ fun AchievementPage(navController: NavController)
 }
 
 @Composable
-fun AchievementItem(modifier: Modifier, resourceId:Int,achievementName: String = "成就名称", achievementDescription: String = "成就描述")
+fun AchievementItem(modifier: Modifier, resourceId:Int,achievementName: String = "成就名称", achievementDescription: String = "成就描述", isAchieved:Boolean = false)
 {
     // 创建一个色彩矩阵用于灰阶色滤镜
     val grayScaleColorMatrix = ColorMatrix().apply {
@@ -84,14 +89,26 @@ fun AchievementItem(modifier: Modifier, resourceId:Int,achievementName: String =
                 .align(Alignment.Center)
         ) {
             // 使用Image组件代替Icon
-            Image(
-                painter = painterResource(id = resourceId),
-                contentDescription = "成就图标",
-                modifier = Modifier
-                    .size(80.dp)
-                    .align(Alignment.CenterHorizontally),
-                colorFilter = ColorFilter.colorMatrix(grayScaleColorMatrix) // 应用灰阶色滤镜
-            )
+            if (isAchieved)
+            {
+                Image(
+                    painter = painterResource(id = resourceId),
+                    contentDescription = "成就图标",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .align(Alignment.CenterHorizontally)
+                )
+            }else{
+                Image(
+                    painter = painterResource(id = resourceId),
+                    contentDescription = "成就图标",
+                    modifier = Modifier
+                        .size(80.dp)
+                        .align(Alignment.CenterHorizontally),
+                    colorFilter = ColorFilter.colorMatrix(grayScaleColorMatrix) // 应用灰阶色滤镜
+                )
+            }
+
             Text(
                 text = achievementName,
                 fontSize = 24.sp,
