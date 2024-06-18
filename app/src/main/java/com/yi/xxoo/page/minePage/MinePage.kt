@@ -1,5 +1,6 @@
 package com.yi.xxoo.page.minePage
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -19,6 +20,7 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.yi.xxoo.R
+import com.yi.xxoo.page.loginPage.noRippleClickable
 import kotlinx.coroutines.launch
 
 object MySize {
@@ -48,6 +51,9 @@ fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltVie
     coroutineScope.launch {
         mineViewModel.getUserData()
     }
+//    LaunchedEffect (true){
+//        mineViewModel.creatGame()
+//    }
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -55,7 +61,10 @@ fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltVie
                 .fillMaxSize()
         ) {
             photo {
-
+                coroutineScope.launch {
+                    val his = mineViewModel.getUserHistory()
+                    Log.d("TAG", "MinePage: $his")
+                }
             }
             Spacer(modifier = Modifier.height(32.dp))
             achievement {
@@ -88,6 +97,9 @@ fun photo(unit:()->Unit) {
             painterResource(id = R.drawable.coin), contentDescription = "头像", modifier = Modifier
                 .padding(MySize.photoPadding)
                 .size(MySize.photoSize)
+                .noRippleClickable {
+                    unit()
+                }
         )
         Text(
             text = "name", fontSize = MySize.nameSize, modifier = Modifier

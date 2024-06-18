@@ -2,22 +2,16 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
+      <entry key="MatchPage">
+        <State />
+      </entry>
       <entry key="OOXX.xxoo.app">
         <State />
       </entry>
-      <entry key="PlayTimesStatistic">
+      <entry key="RepeatingRippleButton">
         <State />
       </entry>
-      <entry key="RankPage">
-        <State />
-      </entry>
-      <entry key="RollPage">
-        <State />
-      </entry>
-      <entry key="StartPage">
-        <State />
-      </entry>
-      <entry key="StatisticPage">
+      <entry key="TimerScreen">
         <State />
       </entry>
       <entry key="app">

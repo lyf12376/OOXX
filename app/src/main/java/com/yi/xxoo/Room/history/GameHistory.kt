@@ -17,7 +17,8 @@ data class GameHistory(
     @PrimaryKey(autoGenerate = true)
     val id : Long = 0,
     val userAccount : String,
+    val gameId : String,
     val startTime : String,
     val gameTime : String,
-    val state : String
+    val state : Int
 )

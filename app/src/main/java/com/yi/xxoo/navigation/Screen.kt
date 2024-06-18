@@ -18,4 +18,8 @@ sealed class Screen(val route:String, val description:String){
     object StatisticPage : Screen("StatisticPage","数据")
 
     object RankPage:Screen("RankPage","排名")
+
+    object MatchPage:Screen("MatchPage","匹配")
+
+    object PreparePage:Screen("PreParePage","准备")
 }

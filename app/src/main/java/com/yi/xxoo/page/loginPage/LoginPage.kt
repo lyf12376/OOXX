@@ -105,6 +105,10 @@ fun LoginPage(
             }
         )
     }
+//    LaunchedEffect (true){
+//        loginViewModel.creatUser()
+//    }
+
     Box(
         Modifier
             .fillMaxSize()

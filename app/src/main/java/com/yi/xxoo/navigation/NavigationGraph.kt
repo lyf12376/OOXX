@@ -14,6 +14,7 @@ import com.yi.xxoo.page.gamePage.GameGrid
 import com.yi.xxoo.page.gamePage.GamePage
 import com.yi.xxoo.page.levelPage.LevelPage
 import com.yi.xxoo.page.loginPage.LoginPage
+import com.yi.xxoo.page.matchPage.MatchPage
 import com.yi.xxoo.page.minePage.MinePage
 import com.yi.xxoo.page.rankPage.RankPage
 import com.yi.xxoo.page.registerPage.RegisterPage
@@ -22,7 +23,7 @@ import com.yi.xxoo.page.statisticPage.StatisticPage
 @Composable
 fun NavigationGraph(
     navHostController: NavHostController,
-    startDestination: String = Screen.LoginPage.route,
+    startDestination: String = Screen.MatchPage.route,
 ){
 
     NavHost(navController = navHostController, startDestination = startDestination){
@@ -58,6 +59,9 @@ fun NavigationGraph(
         }
         composable(Screen.RankPage.route){
             RankPage(navController = navHostController)
+        }
+        composable(Screen.MatchPage.route){
+            MatchPage(navHostController)
         }
     }
 }

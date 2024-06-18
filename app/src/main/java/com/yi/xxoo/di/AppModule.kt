@@ -1,6 +1,8 @@
 package com.yi.xxoo.di
 
 import android.content.Context
+import com.coder.vincent.sharp_retrofit.call_adapter.flow.FlowCallAdapterFactory
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import com.yi.xxoo.Room.game.GameDao
 import com.yi.xxoo.Room.game.GameDatabase
 import com.yi.xxoo.Room.history.GameHistoryDao
@@ -15,6 +17,8 @@ import com.yi.xxoo.Room.savedUser.SavedUserDao
 import com.yi.xxoo.Room.savedUser.SavedUserDatabase
 import com.yi.xxoo.Room.user.UserDao
 import com.yi.xxoo.Room.user.UserDatabase
+import com.yi.xxoo.network.GameHistory.GameHistoryService
+import com.yi.xxoo.network.Match.MatchService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,7 +35,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    private val localUrl = "http://localhost:8080"
+    private val localUrl = "http://10.70.143.129:8080"
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
@@ -57,7 +61,20 @@ object AppModule {
             .baseUrl(localUrl)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(FlowCallAdapterFactory.create())
             .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideGameHistoryService(retrofit: Retrofit): GameHistoryService {
+        return retrofit.create(GameHistoryService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideMatchService(retrofit: Retrofit): MatchService{
+        return retrofit.create(MatchService::class.java)
     }
 
     @Singleton
