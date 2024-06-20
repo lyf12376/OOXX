@@ -1,15 +1,10 @@
-package com.yi.xxoo.page.gamePage
+package com.yi.xxoo.page.offlineGamePage
 
 import android.content.Context
-import android.media.SoundPool
 import android.util.Log
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yi.xxoo.Const.UserData
-import com.yi.xxoo.R
 import com.yi.xxoo.Room.game.Game
 import com.yi.xxoo.Room.game.GameDao
 import com.yi.xxoo.Room.rank.worldBest.WorldBestRecord
@@ -23,10 +18,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.properties.Delegates
 
 @HiltViewModel
-class GameViewModel @Inject constructor(
+class OfflineGameViewModel @Inject constructor(
     private val gameDao: GameDao,
     private val worldBestRecordDao: WorldBestRecordDao,
     private val userDao: UserDao

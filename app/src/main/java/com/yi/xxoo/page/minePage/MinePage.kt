@@ -49,7 +49,7 @@ object MySize {
 fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltViewModel()) {
     val coroutineScope = rememberCoroutineScope()
     coroutineScope.launch {
-        mineViewModel.getUserData()
+        mineViewModel.creatUser()
     }
 //    LaunchedEffect (true){
 //        mineViewModel.creatGame()

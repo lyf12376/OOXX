@@ -1,21 +1,19 @@
 package com.yi.xxoo.navigation
 
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import com.yi.xxoo.TransparentSystemBars
 import com.yi.xxoo.page.achievementPage.AchievementPage
 import com.yi.xxoo.page.documentPage.BasicMessage
-import com.yi.xxoo.page.gamePage.GameGrid
-import com.yi.xxoo.page.gamePage.GamePage
+import com.yi.xxoo.page.offlineGamePage.GamePage
 import com.yi.xxoo.page.levelPage.LevelPage
 import com.yi.xxoo.page.loginPage.LoginPage
 import com.yi.xxoo.page.matchPage.MatchPage
 import com.yi.xxoo.page.minePage.MinePage
+import com.yi.xxoo.page.preparePage.PreparePage
 import com.yi.xxoo.page.rankPage.RankPage
 import com.yi.xxoo.page.registerPage.RegisterPage
 import com.yi.xxoo.page.statisticPage.StatisticPage
@@ -62,6 +60,9 @@ fun NavigationGraph(
         }
         composable(Screen.MatchPage.route){
             MatchPage(navHostController)
+        }
+        composable(Screen.PreparePage.route){
+            PreparePage()
         }
     }
 }

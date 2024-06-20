@@ -114,6 +114,8 @@ dependencies {
     implementation ("io.github.vincent-series:sharp-retrofit:1.9")
     implementation("com.squareup.okhttp3:logging-interceptor")
 
+    implementation("com.github.vitaviva:ComposeWaveLoading:0.1.4")
+
 //    implementation ("io.ktor:ktor-client-android:1.6.7")
 //    implementation ("io.ktor:ktor-client-websockets:1.6.7")
 //    implementation ("io.ktor:ktor-client-cio:1.6.7")

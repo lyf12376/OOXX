@@ -2,13 +2,16 @@
 <project version="4">
   <component name="deploymentTargetDropDown">
     <value>
+      <entry key="AnimatedComponent">
+        <State />
+      </entry>
       <entry key="MatchPage">
         <State />
       </entry>
       <entry key="OOXX.xxoo.app">
         <State />
       </entry>
-      <entry key="RepeatingRippleButton">
+      <entry key="PreparePage">
         <State />
       </entry>
       <entry key="TimerScreen">
