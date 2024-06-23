@@ -216,7 +216,7 @@ fun LevelSelectionScreen(navController: NavController,levelViewModel: LevelViewM
             modifier = Modifier
                 .size(80.dp)
                 .clickable {
-                    navController.navigate("GamePage/${pagerState.currentPage + 1}")
+                    navController.navigate("OfflineGamePage/${pagerState.currentPage + 1}")
                 })
 
         // Record at the bottom

@@ -1,8 +1,10 @@
 package com.yi.xxoo.di
 
 import android.content.Context
+import android.util.Log
 import com.coder.vincent.sharp_retrofit.call_adapter.flow.FlowCallAdapterFactory
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
+import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.Room.game.GameDao
 import com.yi.xxoo.Room.game.GameDatabase
 import com.yi.xxoo.Room.history.GameHistoryDao
@@ -17,8 +19,8 @@ import com.yi.xxoo.Room.savedUser.SavedUserDao
 import com.yi.xxoo.Room.savedUser.SavedUserDatabase
 import com.yi.xxoo.Room.user.UserDao
 import com.yi.xxoo.Room.user.UserDatabase
-import com.yi.xxoo.network.GameHistory.GameHistoryService
-import com.yi.xxoo.network.Match.MatchService
+import com.yi.xxoo.network.gameHistory.GameHistoryService
+import com.yi.xxoo.network.match.MatchService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -28,6 +30,10 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.PrintWriter
+import java.net.Socket
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -61,6 +67,7 @@ object AppModule {
             .baseUrl(localUrl)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .addCallAdapterFactory(FlowCallAdapterFactory.create())
             .build()
     }
@@ -160,6 +167,56 @@ object AppModule {
     fun provideSavedUserDao(database: SavedUserDatabase): SavedUserDao {
         return database.savedUserDao()
     }
+
+
+//    private var socket = Socket()
+//    private var out: PrintWriter? = null
+//    private var `in`: BufferedReader? = null
+//
+//    fun connect() {
+//        Log.d("TAG", "connect: ddddddddddddddddddddd")
+//        try {
+//            socket = Socket("10.70.143.129", 6666).also { sock ->
+//                out = PrintWriter(sock.getOutputStream(), true)
+//                `in` = BufferedReader(InputStreamReader(sock.getInputStream()))
+//                out!!.println(UserData.account)
+//            }
+//        }catch (e:Exception){
+//            Log.d("TAG", "connect: ddddddddddddd ${e.message}")
+//        }
+//
+//    }
+//
+//    fun disConnectSocket() {
+//        try {
+//            socket.close()
+//            out?.close()
+//            `in`?.close()
+//        } catch (e: Exception) {
+//            println("Error closing resources: ${e.message}")
+//        }
+//    }
+//
+//    @Singleton
+//    @Provides
+//    fun provideSocket(): Socket
+//    {
+//        return socket
+//    }
+//
+//    @Singleton
+//    @Provides
+//    fun provideOut(): PrintWriter?
+//    {
+//        return out
+//    }
+//
+//    @Singleton
+//    @Provides
+//    fun provideIn(): BufferedReader?
+//    {
+//        return `in`
+//    }
 
 
 

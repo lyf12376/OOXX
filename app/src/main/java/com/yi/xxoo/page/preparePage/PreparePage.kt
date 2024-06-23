@@ -25,15 +25,19 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.github.compose.waveloading.DrawType
 import com.github.compose.waveloading.WaveLoading
+import com.yi.xxoo.Const.OnlineGame
+import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
+import com.yi.xxoo.navigation.Screen
 import com.yi.xxoo.page.matchPage.UserContent
 import com.yi.xxoo.utils.GifImage
 import kotlinx.coroutines.delay
 
 @Composable
-fun PreparePage(prepareViewModel: PrepareViewModel = hiltViewModel()) {
+fun PreparePage(navController: NavController,prepareViewModel: PrepareViewModel = hiltViewModel()) {
     val isGifShow = prepareViewModel.gifShow.collectAsState()
     val isFirstFlagShow = prepareViewModel.firstFlagShow.collectAsState()
     val isNextFlagShow = prepareViewModel.nextFlagShow.collectAsState()
@@ -42,12 +46,18 @@ fun PreparePage(prepareViewModel: PrepareViewModel = hiltViewModel()) {
         androidx.compose.animation.core.Animatable(0f)
     }
     val isLoading = prepareViewModel.loading.collectAsState()
+    LaunchedEffect (isLoading.value){
+        if (isLoading.value){
+            delay(5000)
+            navController.navigate("OnlineGamePage")
+        }
+    }
     LaunchedEffect(isLoading.value) {
         if (isLoading.value)
             progress.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(
-                    durationMillis = 10000
+                    durationMillis = 5000
                 )
             )
     }
@@ -71,26 +81,32 @@ fun PreparePage(prepareViewModel: PrepareViewModel = hiltViewModel()) {
     }
     AnimatedVisibility(visible = isFirstFlagShow.value) {
         AnimatedComponentLeft {
-            UserContent()
+            UserContent(UserData.name)
         }
     }
     AnimatedVisibility(visible = isNextFlagShow.value) {
         AnimatedComponentRight {
-            UserContent()
+            UserContent(OnlineGame.enemyName)
         }
     }
     AnimatedVisibility(visible = isLoading.value) {
         Box(modifier = Modifier.fillMaxSize()) {
             WaveLoading(
-                modifier = Modifier.size(200.dp).align(Alignment.BottomCenter).padding(16.dp),
+                modifier = Modifier
+                    .size(200.dp)
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp),
                 backDrawType = DrawType.DrawImage,
                 foreDrawType = DrawType.DrawImage,
                 amplitude = 0.05f,
                 velocity = 0.2f,
                 progress = progress.value
             ) {
-                Image(painterResource(id = R.drawable.loading), contentDescription = "", modifier = Modifier.fillMaxSize().align(
-                    Alignment.BottomCenter))
+                Image(painterResource(id = R.drawable.loading), contentDescription = "", modifier = Modifier
+                    .fillMaxSize()
+                    .align(
+                        Alignment.BottomCenter
+                    ))
             }
         }
     }

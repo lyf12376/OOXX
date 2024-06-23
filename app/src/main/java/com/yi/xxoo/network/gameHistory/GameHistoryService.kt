@@ -1,6 +1,5 @@
-package com.yi.xxoo.network.GameHistory
+package com.yi.xxoo.network.gameHistory
 
-import com.yi.xxoo.Room.history.GameHistory
 import retrofit2.http.GET
 import retrofit2.http.Query
 

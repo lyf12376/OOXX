@@ -55,19 +55,12 @@ class PrepareViewModel @Inject constructor() : ViewModel(){
         }
     }
 
-    fun resetTimer() {
+    private fun resetTimer() {
         _isRunning.value = false
         timerJob.cancel()
         _time.value = 0L
     }
 
-    fun showFirstFlag()
-    {
-        _firstFlagShow.value = true
-    }
 
-    fun showNextFlag(){
-        _nextFlagShow.value = true
-    }
 
 }

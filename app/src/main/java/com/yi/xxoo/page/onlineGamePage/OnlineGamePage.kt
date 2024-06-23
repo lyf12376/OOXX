@@ -1,7 +1,8 @@
-package com.yi.xxoo.page.offlineGamePage
+package com.yi.xxoo.page.onlineGamePage
 
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -25,7 +26,9 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -51,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.yi.xxoo.Const.OnlineGame
 import com.yi.xxoo.Const.ScreenData
 import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
@@ -59,34 +63,49 @@ import com.yi.xxoo.utils.GameUtils
 import kotlinx.coroutines.delay
 
 @Composable
-fun OfflineGamePage(navController: NavController, level:Int, offlineGameViewModel: OfflineGameViewModel = hiltViewModel()) {
-    val gameDetail by offlineGameViewModel.gameDetail.collectAsState()
-    val gameSuccess by offlineGameViewModel.gameSuccess.collectAsState()
+fun OnlineGamePage(navController: NavController,onlineGameViewModel: OnlineGamePageViewModel = hiltViewModel())
+{
+    val gameSuccess by onlineGameViewModel.gameSuccess.collectAsState()
     val context = LocalContext.current
-
-    // 调用getGame获取指定等级的游戏信息
-    LaunchedEffect(level) {
-        offlineGameViewModel.getGame(level)
-        offlineGameViewModel.loadMusic(context, R.raw.win)
-    }
-    offlineGameViewModel.target = gameDetail?.target ?: ""
+    val musicId = R.raw.win
 
     var time by remember { mutableIntStateOf(0) } // 使用 State 来持有时间
 
     // LaunchedEffect 用于启动协程，true作为key，表示这个效果在LaunchedEffect的参数不变时只执行一次
     LaunchedEffect(true) {
+        onlineGameViewModel.loadMusic(context, musicId)
         while (!gameSuccess) {
             time++ // 每次循环递增时间
             delay(1000) // 延迟一秒
         }
-
     }
-
-
-
-    val game = gameDetail ?: return
-    val init = GameUtils.expandStringToNxNList(game.init)
+    
+    val init = GameUtils.expandStringToNxNList(OnlineGame.init)
     val now = remember { mutableStateOf(init.map { it.toMutableList() }.toMutableList()) }
+
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog){
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("退出") },
+            text = { Text("是否退出游戏") },
+            confirmButton = {
+                Button(onClick = {
+                    showDialog = false
+                    //退出游戏逻辑
+                    onlineGameViewModel.exitGame()
+                }) {
+                    Text("确定")
+                }
+                Button(onClick = {
+                    showDialog = false
+                }) {
+                    Text("取消")
+                }
+            }
+        )
+    }
 
 
     Column(
@@ -100,8 +119,7 @@ fun OfflineGamePage(navController: NavController, level:Int, offlineGameViewMode
                     .padding(18.dp)
                     .size(36.dp)
                     .clickable {
-                        // 返回上一页
-                        navController.popBackStack()
+                        showDialog = true
                     }
             )
             Timer(
@@ -111,34 +129,8 @@ fun OfflineGamePage(navController: NavController, level:Int, offlineGameViewMode
                 time = time
             )
         }
-        Row(modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = "第${level}关",
-                    fontSize = 24.sp,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .padding(bottom = 0.dp)
-                        .alpha(0.5f)
-                        .align(Alignment.CenterHorizontally)
-                )
-                Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    Text(text = "难度:", fontSize = 16.sp)
-                    gameDetail?.let {
-                        for (i in 1..it.difficulty) {
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = "星星",
-                                tint = Color.Red
-                            )
-                        }
-                    }
-
-                }
-            }
-        }
-        Record(level)
-        GameGrid(gameDetail,now)
+        
+        GameGrid(init,now)
         Button(
             onClick = {
                 now.value = init.map { it.toMutableList() }.toMutableList()
@@ -151,7 +143,7 @@ fun OfflineGamePage(navController: NavController, level:Int, offlineGameViewMode
         }
         Button(
             onClick = {
-                offlineGameViewModel.check(now.value.joinToString("") { it.joinToString("") },time,level)
+                onlineGameViewModel.check(now.value.joinToString("") { it.joinToString("") },time)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -164,21 +156,23 @@ fun OfflineGamePage(navController: NavController, level:Int, offlineGameViewMode
     }
 
     Box {
-        GameSuccessAnimation(modifier = Modifier
+        com.yi.xxoo.page.offlineGamePage.GameSuccessAnimation(modifier = Modifier
             .fillMaxSize()
-            .clickable { navController.popBackStack() }, visible = gameSuccess,
-        playMusic = {
-            offlineGameViewModel.playMusic()
-        }){
-            offlineGameViewModel.releaseMusic()
+            .clickable {
+
+            }, 
+            visible = gameSuccess,
+            playMusic = {
+                onlineGameViewModel.playMusic()
+            }) {
+            onlineGameViewModel.releaseMusic()
         }
     }
+
 }
 
 @Composable
-fun GameGrid(game: Game?,now: MutableState<MutableList<MutableList<Char>>>) {
-    val game = game ?: return
-    val init = GameUtils.expandStringToNxNList(game.init)
+fun GameGrid(init:List<List<Char>>, now: MutableState<MutableList<MutableList<Char>>>) {
     val gridSize = init.size // 从init确定的网格尺寸
     val recSize = ((ScreenData.screenWidthDp.value - 16) - (gridSize) * 2) / (gridSize + 1) // 每个单元格的尺寸
 
@@ -365,9 +359,9 @@ fun Record(level: Int) {
 }
 
 @Composable
-fun GameSuccessAnimation(modifier: Modifier, visible: Boolean,playMusic:()->Unit = {},release:()->Unit = {}) {
+fun GameSuccessAnimation(modifier: Modifier, visible: Boolean, playMusic:()->Unit = {}, release:()->Unit = {}) {
     val scale = remember {
-        androidx.compose.animation.core.Animatable(1f)
+        Animatable(1f)
     }
     // 对visible进行监听，如果变为true，则执行动画
     LaunchedEffect(visible) {
@@ -414,4 +408,3 @@ fun GameSuccessAnimation(modifier: Modifier, visible: Boolean,playMusic:()->Unit
         )
     }
 }
-

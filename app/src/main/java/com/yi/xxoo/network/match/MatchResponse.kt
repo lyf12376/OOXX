@@ -1,4 +1,4 @@
-package com.yi.xxoo.network.Match
+package com.yi.xxoo.network.match
 
 import com.yi.xxoo.bean.rankGame.RankGameResult
 

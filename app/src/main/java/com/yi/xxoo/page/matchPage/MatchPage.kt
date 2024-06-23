@@ -9,10 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -27,10 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.ripple.LocalRippleTheme
-import androidx.compose.material.ripple.RippleAlpha
-import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -46,12 +40,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -59,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.github.compose.waveloading.DrawType
 import com.github.compose.waveloading.WaveLoading
+import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
 import com.yi.xxoo.utils.RippleButton
 import com.yi.xxoo.utils.RippleButton.clearRipples
@@ -66,6 +58,7 @@ import com.yi.xxoo.utils.RippleButton.emitPress
 import com.yi.xxoo.utils.RippleButton.emitRelease
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -76,29 +69,45 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
     }
     val matchResponse by matchViewModel.message.collectAsState()
     val matchSuccess = matchViewModel.matched.collectAsState()
+    val startGame = matchViewModel.startGame.collectAsState()
+    val isUserAccept = matchViewModel.accept.collectAsState()
     val progress = remember {
         Animatable(1f)
+    }
+    LaunchedEffect (startGame.value){
+        if (startGame.value) {
+            Log.d("TAG", "MatchPage: 13213")
+            navController.navigate("PreparePage")
+        }
     }
 
     LaunchedEffect(matchResponse) {
         if (matchResponse.code == 200) {
             Log.d("dasdasdasdasdasdsadasdasdasdsdasdas", "MatchPage: ")
-            matchViewModel.matchSuccess()
+            matchViewModel.matchSuccess(matchResponse.data)
             matchViewModel.connectSocket()
             Log.d("TAG", "MatchPage: ${matchResponse.data}")
         }
 
     }
 
-    LaunchedEffect(matchSuccess.value) {
-        if (matchSuccess.value) {
+    val scope = rememberCoroutineScope()
+    var animationJob: Job? by remember { mutableStateOf(null) }
+
+    LaunchedEffect(isUserAccept.value) {
+        if (isUserAccept.value) {
             Log.d("TAG", "MatchPage: 1324564654564564156")
-            progress.animateTo(
-                targetValue = 0f,
-                animationSpec = tween(
-                    durationMillis = 10000
+            animationJob = scope.launch {
+                progress.snapTo(1f)
+                progress.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(
+                        durationMillis = 10000
+                    )
                 )
-            )
+            }
+        } else {
+            animationJob?.cancel()
         }
     }
 
@@ -138,7 +147,7 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
                 .fillMaxWidth()
                 .height(600.dp), contentAlignment = Alignment.Center
         ) {
-            UserContent()
+            UserContent(UserData.name)
         }
         Spacer(modifier = Modifier.height(36.dp))
 
@@ -179,16 +188,19 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
                             Image(
                                 painterResource(id = R.drawable.accept),
                                 contentDescription = "",
-                                modifier = Modifier.align(
-                                    Alignment.Center
-                                ).size(400.dp)
+                                modifier =
+                                Modifier
+                                    .align(Alignment.Center)
+                                    .size(400.dp)
                             )
                         }
                         Box (modifier = Modifier.align(Alignment.Center)){
                             Text(
                                 text = "接受匹配",
                                 fontSize = 36.sp,
-
+                                modifier = Modifier.clickable {
+                                    matchViewModel.acceptedMatch()
+                                }
                             )
                         }
                     }
@@ -203,7 +215,7 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
 }
 
 @Composable
-fun UserContent() {
+fun UserContent(name:String) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         // 使用maxWidth和maxHeight获取外部Box的尺寸
         val maxWidth = maxWidth
@@ -239,7 +251,7 @@ fun UserContent() {
             )
             Spacer(modifier = Modifier.height(maxHeight * 0.15f))
             Text(
-                text = "name", fontSize = 48.sp, modifier = Modifier
+                text = name, fontSize = 48.sp, modifier = Modifier
                     .align(Alignment.CenterHorizontally)
             )
         }
@@ -272,7 +284,12 @@ fun RepeatingRippleButton(modifier: Modifier, matchViewModel: MatchViewModel = h
                 .background(Color("#99EBFF".toColorInt()))
                 .clickable {
                     isRippleActive = !isRippleActive
-                    matchViewModel.matching()
+                    if (isRippleActive) {
+                        matchViewModel.matching()
+                    } else {
+                        matchViewModel.cancel()
+                    }
+
                     if (isRunning) {
                         matchViewModel.resetTimer()
                     } else

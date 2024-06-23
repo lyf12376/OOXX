@@ -8,11 +8,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.yi.xxoo.page.achievementPage.AchievementPage
 import com.yi.xxoo.page.documentPage.BasicMessage
-import com.yi.xxoo.page.offlineGamePage.GamePage
+import com.yi.xxoo.page.offlineGamePage.OfflineGamePage
 import com.yi.xxoo.page.levelPage.LevelPage
 import com.yi.xxoo.page.loginPage.LoginPage
 import com.yi.xxoo.page.matchPage.MatchPage
 import com.yi.xxoo.page.minePage.MinePage
+import com.yi.xxoo.page.onlineGamePage.OnlineGamePage
 import com.yi.xxoo.page.preparePage.PreparePage
 import com.yi.xxoo.page.rankPage.RankPage
 import com.yi.xxoo.page.registerPage.RegisterPage
@@ -32,10 +33,10 @@ fun NavigationGraph(
             MinePage(navHostController)
         }
         composable(
-            Screen.GamePage.route,
+            Screen.OfflineGamePage.route,
             arguments = listOf(navArgument("level"){type = NavType.IntType})
         ){
-            GamePage(navHostController,level = it.arguments?.getInt("level") ?: 0)
+            OfflineGamePage(navHostController,level = it.arguments?.getInt("level") ?: 0)
         }
         composable(Screen.LoginPage.route){
             LoginPage(navHostController)
@@ -62,7 +63,10 @@ fun NavigationGraph(
             MatchPage(navHostController)
         }
         composable(Screen.PreparePage.route){
-            PreparePage()
+            PreparePage(navHostController)
+        }
+        composable(Screen.OnlineGamePage.route){
+            OnlineGamePage(navHostController)
         }
     }
 }

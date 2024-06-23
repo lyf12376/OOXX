@@ -5,7 +5,7 @@ sealed class Screen(val route:String, val description:String){
 
     object LevelPage : Screen("LevelPage", "关卡")
 
-    object GamePage : Screen("GamePage/{level}", "游戏")
+    object OfflineGamePage : Screen("OfflineGamePage/{level}", "单机游戏")
 
     object MinePage : Screen("MinePage", "我的")
 
@@ -22,4 +22,6 @@ sealed class Screen(val route:String, val description:String){
     object MatchPage:Screen("MatchPage","匹配")
 
     object PreparePage:Screen("PreParePage","准备")
+
+    object OnlineGamePage:Screen("OnlineGamePage","联机游戏")
 }

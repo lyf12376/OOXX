@@ -1,4 +1,4 @@
-package com.yi.xxoo.network.GameHistory
+package com.yi.xxoo.network.gameHistory
 
 import com.yi.xxoo.Room.history.GameHistory
 
