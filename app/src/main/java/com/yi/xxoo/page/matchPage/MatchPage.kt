@@ -77,7 +77,9 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
     LaunchedEffect (startGame.value){
         if (startGame.value) {
             Log.d("TAG", "MatchPage: 13213")
-            navController.navigate("PreparePage")
+            navController.navigate("PreparePage"){
+                popUpTo("MatchPage")
+            }
         }
     }
 

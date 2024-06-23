@@ -49,7 +49,9 @@ fun PreparePage(navController: NavController,prepareViewModel: PrepareViewModel 
     LaunchedEffect (isLoading.value){
         if (isLoading.value){
             delay(5000)
-            navController.navigate("OnlineGamePage")
+            navController.navigate("OnlineGamePage"){
+                popUpTo("MatchPage")
+            }
         }
     }
     LaunchedEffect(isLoading.value) {

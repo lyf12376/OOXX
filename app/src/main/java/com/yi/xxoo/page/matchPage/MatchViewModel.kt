@@ -37,7 +37,7 @@ class MatchViewModel @Inject constructor(
     }
 
     suspend fun getUserData() {
-        UserData.setUser(userDao.getUserByEmail("account"))
+        UserData.setUser(userDao.getUserByEmail("account1"))
     }
 
     //计时器
