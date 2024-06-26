@@ -2,8 +2,8 @@ package com.yi.xxoo.page.documentPage
 
 import android.content.ContentResolver
 import android.content.Context
-import android.content.Intent
 import android.database.Cursor
+import android.graphics.Bitmap
 import android.net.Uri
 import android.provider.MediaStore
 import android.util.Log
@@ -30,11 +30,13 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,37 +44,40 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
+import com.mr0xf00.easycrop.AspectRatio
+import com.mr0xf00.easycrop.CropError
+import com.mr0xf00.easycrop.CropResult
+import com.mr0xf00.easycrop.CropperStyle
+import com.mr0xf00.easycrop.DefaultCropShapes
+import com.mr0xf00.easycrop.crop
 import com.mr0xf00.easycrop.rememberImageCropper
+import com.mr0xf00.easycrop.ui.ImageCropperDialog
+import com.yi.xxoo.Const.GameMode
 import com.yi.xxoo.R
-import com.yi.xxoo.page.registerPage.RegisterViewModel
 import com.yi.xxoo.utils.pictrueUtils.PhotoComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.io.BufferedReader
+import java.io.File
+import java.io.FileOutputStream
 import java.io.InputStreamReader
 
 @Composable
-fun BasicMessage(navController: NavController, account : String,viewModel: RegisterViewModel = hiltViewModel()) {
+fun DocumentPage(navController: NavController, documentViewModel: DocumentViewModel = hiltViewModel()) {
     val textWidth = 300.dp
     val textHeight = 50.dp
-    val scope1 = CoroutineScope(Dispatchers.IO)
-    val list = listOf("女", "男", "未知")
-    var navigae = false
     var showDialog1 by remember {
         mutableStateOf(false)
     }
@@ -87,21 +92,57 @@ fun BasicMessage(navController: NavController, account : String,viewModel: Regis
     }
 
     val imageCropper = rememberImageCropper()
-    var imageUri by remember { mutableStateOf<Uri?>(null) }
 
     var name by remember {
         mutableStateOf("")
     }
-
-    var gender by remember {
-        mutableStateOf(0)
+    val isCropped = remember {
+        mutableStateOf(false)
     }
 
     val context = LocalContext.current
+    val croppedBitmap = remember { mutableStateOf<ImageBitmap?>(null) }
+    var file:File? = null
+    val editSuccess = documentViewModel.editSuccess.collectAsState()
 
-    var profilePhotoChanged by remember {
-        mutableStateOf(false)
+    LaunchedEffect (croppedBitmap){
+        isCropped.value = true
     }
+
+    LaunchedEffect (editSuccess.value){
+        if (editSuccess.value == 2){
+            navController.navigate("MinePage"){
+                popUpTo("DocumentPage")
+            }
+        }
+    }
+
+    LaunchedEffect(localImgPath.path){
+        if(localImgPath!= Uri.EMPTY){
+            when (val result = imageCropper.crop(localImgPath, context)) { // 根据您的上下文适当调整参数
+                CropResult.Cancelled -> { /* 裁剪取消 */ }
+                is CropError -> { /* 裁剪错误处理 */ }
+                is CropResult.Success -> {
+                    // 使用裁剪后的图片
+                    croppedBitmap.value = result.bitmap
+                    Log.d("TAG", "BasicMessage: aaaaaaaaaaa")
+                }
+            }
+        }
+    }
+    val cropState = imageCropper.cropState
+    if(cropState != null) {
+        ImageCropperDialog(
+            state = cropState,
+            style = CropperStyle(
+                autoZoom = true,
+                guidelines = null,
+                shapes = listOf(DefaultCropShapes[1]),
+                aspects = listOf(AspectRatio(1,1))
+            )
+        )
+    }
+
 
     Box(
         Modifier
@@ -147,20 +188,53 @@ fun BasicMessage(navController: NavController, account : String,viewModel: Regis
                 Image(
                     painter = painterResource(R.drawable.img),
                     contentDescription = null,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(0.dp))
+                        .clickable {
+                            showDialog2 = true
+                        },
                 )
             }
-            AsyncImage(
-                model = localImgPath,
-                contentDescription = null,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(0.dp))
-                    .clickable {
-                        showDialog2 = true
-                    },
-                contentScale = ContentScale.FillBounds,
-            )
+            if (isCropped.value) {
+                croppedBitmap.value?.let {
+                    val androidBitmap = it.asAndroidBitmap()
+
+                    try {
+                        file = File(context.cacheDir, "${System.currentTimeMillis()}.png")
+                        val isCreated = file!!.createNewFile()
+                        Log.d("TAG", "DocumentPage: $isCreated ${file!!.absolutePath}")
+                    }catch (e:Exception){
+                        Log.d("TAG", "DocumentPage: ${e.message}")
+                    }
+
+
+                    FileOutputStream(file).use { out ->
+                        androidBitmap.compress(Bitmap.CompressFormat.PNG, 100, out) // png格式质量参数被忽略
+                    }
+                    Image(
+                        it,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable {
+                                showDialog2 = true
+                            },
+                    )
+                }
+//                if (cropState.accepted)
+//                    AsyncImage(
+//                        model = localImgPath,
+//                        contentDescription = null,
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .clip(RoundedCornerShape(0.dp))
+//                            .clickable {
+//                                showDialog2 = true
+//                            },
+//                        contentScale = ContentScale.FillBounds,
+//                    )
+            }
         }
 
 
@@ -291,18 +365,13 @@ fun BasicMessage(navController: NavController, account : String,viewModel: Regis
                     showDialog1 = true
                 }
                 else {
-                    runBlocking {
-                        scope1.launch {
-                            Log.d("TAG", "BasicMessage: ${getRealFilePath(context, localImgPath)}")
-                            getRealFilePath(context, localImgPath)?.let {
-                                viewModel.updatePersonalInformation(account, name, it)
-                            }
-                        }.join()
-                        if (navigae)
-                            navController.navigate("LevelPage")
+                    if (GameMode.isNetworkEnabled){
+                        file?.let { documentViewModel.updateAvatar(it) }
+                        documentViewModel.updateName(name)
+                    }else{
+
                     }
                 }
-
             },
             shape = RoundedCornerShape(0.dp),
             modifier = Modifier

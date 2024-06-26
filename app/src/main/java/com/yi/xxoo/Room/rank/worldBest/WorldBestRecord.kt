@@ -6,8 +6,9 @@ import androidx.room.Entity
     tableName = "WorldBestRecord",
     primaryKeys = ["whichGame"]
 )
-data class WorldBestRecord(
+data class  WorldBestRecord(
     val whichGame : Int,
+    val userAccount:String,
     val userName : String,
     val time : String
 )

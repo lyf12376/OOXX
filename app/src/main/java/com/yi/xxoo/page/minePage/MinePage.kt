@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material3.Divider
@@ -32,6 +34,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
+import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
 import com.yi.xxoo.page.loginPage.noRippleClickable
 import kotlinx.coroutines.launch
@@ -48,37 +52,36 @@ object MySize {
 @Composable
 fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltViewModel()) {
     val coroutineScope = rememberCoroutineScope()
-    coroutineScope.launch {
-        mineViewModel.creatUser()
-    }
-//    LaunchedEffect (true){
-//        mineViewModel.creatGame()
-//    }
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .background(Color(0xFFF0F0F0))
                 .fillMaxSize()
         ) {
-            photo {
-                coroutineScope.launch {
-                    val his = mineViewModel.getUserHistory()
-                    Log.d("TAG", "MinePage: $his")
+            Column (
+                modifier = Modifier
+                    .fillMaxSize()
+                    .navigationBarsPadding()
+                    .statusBarsPadding()
+            ){
+                photo()
+                Spacer(modifier = Modifier.height(32.dp))
+                achievement {
+                    navController.navigate("AchievementPage")
+                }
+                Divider()
+                statistics {
+                    navController.navigate("StatisticPage")
+                }
+                Divider()
+                rank {
+                    navController.navigate("RankPage")
                 }
             }
-            Spacer(modifier = Modifier.height(32.dp))
-            achievement {
-                navController.navigate("AchievementPage")
-            }
-            Divider()
-            statistics {
-                navController.navigate("StatisticPage")
-            }
-            Divider()
-            rank {
-                navController.navigate("RankPage")
-            }
         }
+
+    }
+    Box(modifier = Modifier.fillMaxSize().navigationBarsPadding()){
         MinePageNavigation(
             Modifier
                 .align(Alignment.BottomCenter)
@@ -89,18 +92,13 @@ fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltVie
 }
 
 @Composable
-fun photo(unit:()->Unit) {
+fun photo() {
     Row (modifier = Modifier
         .background(Color.White)
         .fillMaxWidth()) {
-        Image(
-            painterResource(id = R.drawable.coin), contentDescription = "头像", modifier = Modifier
-                .padding(MySize.photoPadding)
-                .size(MySize.photoSize)
-                .noRippleClickable {
-                    unit()
-                }
-        )
+        AsyncImage(model = UserData.photo, contentDescription = "头像", modifier = Modifier
+            .padding(MySize.photoPadding)
+            .size(MySize.photoSize))
         Text(
             text = "name", fontSize = MySize.nameSize, modifier = Modifier
                 .padding(MySize.ItemPadding)

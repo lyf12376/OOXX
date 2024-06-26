@@ -5,13 +5,13 @@ import com.yi.xxoo.utils.RoomUtils.stringToPersonalBestRecord
 
 object UserData {
     var name : String = ""
-    var account : String = ""
+    var account : String = "1357587070@qq.com"
     var password : String = ""
     var coin : Int = 0
     var email : String = ""
     var photo : String = ""
     var achievement : String = ""
-    var level : Int = 0
+    var rank : Int = 0
     var gameTimes : Int = 0
     var time : Int = 0
     var bestRecord: ArrayList<Int> = arrayListOf()
@@ -25,7 +25,7 @@ object UserData {
         coin = userData.coin
         photo = userData.photo
         achievement = userData.achievement
-        level = userData.level
+        rank = userData.rank
         gameTimes = userData.gameTimes
         time = userData.time
         bestRecord = userData.bestRecord.stringToPersonalBestRecord()

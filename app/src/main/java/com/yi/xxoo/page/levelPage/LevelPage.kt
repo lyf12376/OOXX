@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.yi.xxoo.Const.GameMode
 import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
 import com.yi.xxoo.utils.GameUtils
@@ -65,6 +66,178 @@ fun LevelPage(navController: NavController) {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LevelSelectionScreen(navController: NavController,levelViewModel: LevelViewModel = hiltViewModel()) {
+    val games = levelViewModel.gameList.collectAsState(initial = listOf())
+
+    val pagerState = rememberPagerState(
+        initialPage = 0,
+        initialPageOffsetFraction = 0f
+    ) {
+        games.value.size
+    }
+    val coins = levelViewModel.coin.collectAsState()
+    val passNum = levelViewModel.passNum.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
+    var showDialog by remember { mutableStateOf(false) }
+
+    if (showDialog)
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("解锁") },
+            text = { Text("是否花20金币解锁该关卡") },
+            confirmButton = {
+                Button(onClick = {
+                    showDialog = false
+                    levelViewModel.unLockGame(coins.value - 20)
+                }) {
+                    Text("确定")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDialog = false}) {
+                    Text(text = "取消")
+                }
+            }
+        )
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        // Gold box on the top right
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            contentAlignment = Alignment.TopEnd
+        ) {
+            Row {
+                Icon(painterResource(id = R.drawable.coin), contentDescription = "金币数量", modifier = Modifier.size(48.dp) ,tint = Color.Unspecified)
+                Text(
+                    text = "Coins: ${coins.value}",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier
+                        .padding(8.dp)
+                )
+            }
+
+        }
+
+        Text(text = "第${pagerState.currentPage+1}关", fontSize = 48.sp, fontWeight = FontWeight.Bold)
+
+        // Level selection in the middle with Pager
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Previous Level",
+                modifier = Modifier
+                    .size(36.dp)
+                    .clickable {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(
+                                pagerState.currentPage - 1
+                            )
+                        }
+                    }
+            )
+
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier
+                    .size(300.dp)
+                    .border(3.dp, Color("#9F20B5".toColorInt()))
+            ) { page ->
+                if (page <= passNum.value)
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        GamePreview(init = games.value[page])
+                    }
+                else if (page == passNum.value + 1)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Gray.copy(alpha = 0.5f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column (Modifier.clickable {
+                            showDialog = true
+                        }){
+                            Image(painterResource(id = R.drawable.locked), contentDescription = "未解锁", modifier = Modifier.padding(16.dp))
+                            Text(text = "未解锁", fontSize = 24.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.align(
+                                Alignment.CenterHorizontally
+                            ))
+                        }
+
+                    }
+                else
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Gray.copy(alpha = 0.5f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column {
+                            Image(painterResource(id = R.drawable.locked), contentDescription = "未解锁", modifier = Modifier.padding(16.dp))
+                            Text(text = "未解锁", fontSize = 24.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, modifier = Modifier.align(
+                                Alignment.CenterHorizontally
+                            ))
+                        }
+
+                    }
+
+            }
+
+            Icon(
+                imageVector = Icons.Default.ArrowForward,
+                contentDescription = "Next Level",
+                modifier = Modifier
+                    .size(36.dp)
+                    .clickable {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(
+                                pagerState.currentPage + 1
+                            )
+                        }
+                    }
+            )
+        }
+
+        Image(
+            painterResource(id = R.drawable.play),
+            contentDescription = "开始游戏",
+            modifier = Modifier
+                .size(80.dp)
+                .clickable {
+                    navController.navigate("OfflineGamePage/${pagerState.currentPage + 1}")
+                })
+
+        // Record at the bottom
+//        Text(
+//            text = "世界排行",
+//            fontSize = 20.sp,
+//            fontWeight = FontWeight.Bold,
+//            modifier = Modifier
+//                .padding(16.dp)
+//        )
+//        Image(painterResource(id = R.drawable.wb), contentDescription = "世界排行", modifier = Modifier.size(80.dp))
+        LevelPageNavigation{
+            navController.navigate("MinePage")
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun OfflineLevelSelectionScreen(navController: NavController,levelViewModel: LevelViewModel = hiltViewModel()) {
     val games = levelViewModel.gameList.collectAsState(initial = listOf())
 
     val pagerState = rememberPagerState(

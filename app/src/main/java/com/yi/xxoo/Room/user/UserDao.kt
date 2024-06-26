@@ -37,8 +37,8 @@ interface UserDao {
     @Query("UPDATE UserData SET achievement = :achievement WHERE email = :email")
     suspend fun updateUserAchievement(email: String, achievement: String)
 
-    @Query("UPDATE UserData SET level = :level WHERE email = :email")
-    suspend fun updateUserLevel(email: String, level: Int)
+    @Query("UPDATE UserData SET rank = :rank WHERE email = :email")
+    suspend fun updateUserLevel(email: String, rank: Int)
 
     @Query("UPDATE UserData SET gameTimes = :gameTimes WHERE email = :email")
     suspend fun updateUserGameTimes(email: String, gameTimes: Int)
@@ -60,4 +60,5 @@ interface UserDao {
 
     @Query("select passNum from UserData where email = :email")
     fun getUserPassNum(email: String): Flow<Int>
+
 }

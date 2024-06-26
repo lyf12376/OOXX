@@ -87,18 +87,6 @@ fun OnlineGamePage(navController: NavController,onlineGameViewModel: OnlineGameP
     val showSuccessAnim by onlineGameViewModel.showSuccessAnim.collectAsState()
     val context = LocalContext.current
     val isEnemySubmit = onlineGameViewModel.isEnemySubmit.collectAsState()
-    val chatMessage = onlineGameViewModel.chatMessage.collectAsState()
-    val messageList = remember {
-        mutableStateListOf<String>()
-    }
-    LaunchedEffect (chatMessage.value){
-        if (chatMessage.value!=""){
-            messageList.add(chatMessage.value)
-            if (messageList.size>3){
-                messageList.removeAt(0)
-            }
-        }
-    }
     val musicId = R.raw.win
     //提交成功之后显示，是否进入结算页面，如果对方没完成则等待，如果完成则直接显示
     val showDialog1 = remember {
@@ -197,7 +185,7 @@ fun OnlineGamePage(navController: NavController,onlineGameViewModel: OnlineGameP
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(8.dp)
         ) {
             Text(text = "重置" )
         }
@@ -207,11 +195,13 @@ fun OnlineGamePage(navController: NavController,onlineGameViewModel: OnlineGameP
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(8.dp)
         ) {
             Text(text = "提交")
 
         }
+        Spacer(modifier = Modifier.height(18.dp))
+        ChatScreen(Modifier.weight(1f))
 
     }
 
@@ -469,22 +459,22 @@ fun GameSuccessAnimation(modifier: Modifier, visible: Boolean, playMusic:()->Uni
 }
 
 @Composable
-fun ChatScreen() {
-    val messages = remember { mutableStateListOf<Message>() }
+fun ChatScreen(modifier: Modifier,onlineGameViewModel: OnlineGamePageViewModel = hiltViewModel()) {
+    val messages = onlineGameViewModel.chatMessages.collectAsState()
     var currentMessage by remember { mutableStateOf(TextFieldValue("")) }
     val scope = rememberCoroutineScope()
 
+
     Column(
-        modifier = Modifier
-            .fillMaxSize()
+        modifier = modifier
             .background(Color("#F6F6F6".toColorInt()))
             .padding(8.dp)
     ) {
         LazyColumn(
             modifier = Modifier.weight(1f)
         ) {
-            items(messages.size) { message ->
-                ChatMessage(messages[message])
+            items(messages.value.size) { index ->
+                ChatMessage(messages.value[index])
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
@@ -503,8 +493,8 @@ fun ChatScreen() {
                 keyboardActions = KeyboardActions(
                     onSend = {
                         if (currentMessage.text.isNotEmpty()) {
+                            onlineGameViewModel.chat(Message(currentMessage.text, true))
                             scope.launch {
-                                messages.add(Message(currentMessage.text, true))
                                 currentMessage = TextFieldValue("")
                             }
                         }
@@ -514,8 +504,9 @@ fun ChatScreen() {
             Spacer(modifier = Modifier.width(8.dp))
             Button(onClick = {
                 if (currentMessage.text.isNotEmpty()) {
+                    onlineGameViewModel.chat(Message(currentMessage.text, true))
+                    Log.d("TAG", "ChatScreen: ${messages.value}")
                     scope.launch {
-                        messages.add(Message(currentMessage.text, true))
                         currentMessage = TextFieldValue("")
                     }
                 }
@@ -532,9 +523,9 @@ fun ChatMessage(message: Message) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
-        horizontalArrangement = if (!message.isSentByMe) Arrangement.End else Arrangement.Start
+        horizontalArrangement = if (message.isSentByMe) Arrangement.End else Arrangement.Start
     ) {
-        if (!message.isSentByMe) {
+        if (message.isSentByMe) {
             Text(
                 text = message.text,
                 color = Color.White,
@@ -542,7 +533,7 @@ fun ChatMessage(message: Message) {
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier
                     .background(Color.Blue, CircleShape)
-                    .padding(16.dp)
+                    .padding(8.dp)
             )
         } else {
             Text(
@@ -551,7 +542,7 @@ fun ChatMessage(message: Message) {
                 textAlign = TextAlign.Start,
                 modifier = Modifier
                     .background(Color.White, CircleShape)
-                    .padding(16.dp)
+                    .padding(8.dp)
             )
         }
     }

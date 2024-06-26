@@ -42,6 +42,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -53,16 +54,9 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
 import com.yi.xxoo.Room.savedUser.SavedUser
-import com.yi.xxoo.TransparentSystemBars
 import com.yi.xxoo.navigation.Screen
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
@@ -71,11 +65,6 @@ fun LoginPage(
     loginViewModel: LoginViewModel = hiltViewModel()
 ) {
 
-    val scope1 = CoroutineScope(Dispatchers.IO)
-
-    var showDialog by remember {
-        mutableStateOf(false)
-    }
     var rememberPassword by remember {
         mutableStateOf(false)
     }
@@ -90,24 +79,64 @@ fun LoginPage(
     var navigate = false
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
+    val loginSuccess = loginViewModel.loginSuccess.collectAsState()
+    val loginFailed = loginViewModel.loginFailed.collectAsState()
     val keyboardController = LocalSoftwareKeyboardController.current
     val savedUserList = loginViewModel.savedUserList.collectAsState(initial = emptyList())
+    val network = loginViewModel.network.collectAsState()
+    val startOfflineGame = loginViewModel.startOfflineGame.collectAsState()
+    val registerOfflineAccount = loginViewModel.registerOfflineAccount.collectAsState()
+    val context = LocalContext.current
 
-    if (showDialog) {
+
+    if (!network.value){
         AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text("错误") },
-            text = { Text("账号或密码错误，请重试。") },
+            onDismissRequest = { loginViewModel.setLoginFailed() },
+            title = { Text("网络故障") },
+            text = { Text("请检查网络或者开始离线游戏") },
             confirmButton = {
-                Button(onClick = { showDialog = false }) {
+                Button(onClick = { loginViewModel.offlineMode() }) {
+                    Text("离线模式")
+                }
+                Button(onClick = { loginViewModel.reConnect(context) }) {
+                    Text(text = "重新连接")
+                }
+            }
+        )
+    }
+    if (loginFailed.value) {
+        AlertDialog(
+            onDismissRequest = { loginViewModel.setLoginFailed() },
+            title = { Text("错误") },
+            text = { Text("账号或密码错误，或者网络请求出错，请重试。") },
+            confirmButton = {
+                Button(onClick = { loginViewModel.setLoginFailed() }) {
                     Text("确定")
                 }
             }
         )
     }
-//    LaunchedEffect (true){
-//        loginViewModel.creatUser()
-//    }
+    LaunchedEffect (startOfflineGame.value){
+        if (startOfflineGame.value){
+            navController.navigate(Screen.LevelPage.route){
+                popUpTo(Screen.LoginPage.route)
+            }
+        }
+    }
+    LaunchedEffect (registerOfflineAccount.value){
+        if (registerOfflineAccount.value){
+            navController.navigate(Screen.DocumentPage.route){
+                popUpTo(Screen.LoginPage.route)
+            }
+        }
+    }
+    LaunchedEffect(loginSuccess.value) {
+        if (loginSuccess.value) {
+            navController.navigate("MinePage") {
+                popUpTo("LoginPage")
+            }
+        }
+    }
 
     Box(
         Modifier
@@ -232,17 +261,13 @@ fun LoginPage(
                                 painterResource(id = R.drawable.clear),
                                 contentDescription = "取消保存",
                                 modifier = Modifier.clickable {
-                                    scope1.launch {
-                                        loginViewModel.deleteUser(savedUser.account)
-                                    }
+                                    loginViewModel.deleteUser(savedUser.account)
                                 }
                             )
                         }
                     )
-
                 }
             }
-
         }
         Spacer(modifier = Modifier.height(36.dp))
 
@@ -301,28 +326,13 @@ fun LoginPage(
         Spacer(modifier = Modifier.height(36.dp))
         Button(
             onClick = {
-                runBlocking {
-                    withContext(Dispatchers.IO) {
-                        var user = loginViewModel.isLogin(account, password)
-                        if (user != null) {
-                            navigate = true
-                            if (rememberPassword) {
-                                val savedUser = SavedUser(account = account, password = password)
-                                loginViewModel.saveUser(savedUser)
-                            }
-                            UserData.setUser(user)
-                        } else {
-                            showDialog = true
-                        }
-                    }
-                    if (navigate) {
-                        navController.navigate(Screen.MinePage.route)
-                    }
+                if (rememberPassword) {
+                    loginViewModel.saveUser(SavedUser(account = account, password = password))
                 }
-
+                loginViewModel.isLogin(account, password)
             },
             shape = RoundedCornerShape(0.dp),
-            modifier = androidx.compose.ui.Modifier
+            modifier = Modifier
                 .width(textWidth)
                 .height(textHeight)
                 .align(Alignment.CenterHorizontally),

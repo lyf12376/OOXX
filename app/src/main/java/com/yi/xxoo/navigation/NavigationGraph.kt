@@ -7,7 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.yi.xxoo.page.achievementPage.AchievementPage
-import com.yi.xxoo.page.documentPage.BasicMessage
+import com.yi.xxoo.page.documentPage.DocumentPage
 import com.yi.xxoo.page.offlineGamePage.OfflineGamePage
 import com.yi.xxoo.page.levelPage.LevelPage
 import com.yi.xxoo.page.loginPage.LoginPage
@@ -22,7 +22,7 @@ import com.yi.xxoo.page.statisticPage.StatisticPage
 @Composable
 fun NavigationGraph(
     navHostController: NavHostController,
-    startDestination: String = Screen.MatchPage.route,
+    startDestination: String = Screen.LoginPage.route,
 ){
 
     NavHost(navController = navHostController, startDestination = startDestination){
@@ -46,9 +46,8 @@ fun NavigationGraph(
         }
         composable(
             route = Screen.DocumentPage.route,
-            arguments = listOf(navArgument("account"){type = NavType.StringType})
         ){
-            BasicMessage(navController = navHostController, account = it.arguments?.getString("account") ?: "")
+            DocumentPage(navController = navHostController)
         }
         composable(Screen.AchievementPage.route){
             AchievementPage(navHostController)

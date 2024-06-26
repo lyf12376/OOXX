@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.yi.xxoo.Const.OnlineGame
 import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.Room.game.Game
+import com.yi.xxoo.bean.rankGame.Message
 import com.yi.xxoo.bean.rankGame.PlayerSettlement
 import com.yi.xxoo.bean.rankGame.SubmissionRecord
 import com.yi.xxoo.di.SocketModule
@@ -40,11 +41,12 @@ class OnlineGamePageViewModel @Inject constructor(private val matchService: Matc
     private val _isChatEnabled = MutableStateFlow(false)
     val isChatEnabled:StateFlow<Boolean> = _isChatEnabled
 
-    private val _chatMessage = MutableStateFlow("")
-    val chatMessage:StateFlow<String> = _chatMessage
 
     private val submitRecord:MutableList<SubmissionRecord> = emptyList<SubmissionRecord>().toMutableList()
 
+    init {
+        listenForMessages()
+    }
     fun check(now:String,time: Int){
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
@@ -88,11 +90,16 @@ class OnlineGamePageViewModel @Inject constructor(private val matchService: Matc
         }
     }
 
-    fun chat(message:String){
+    private val _chatMessages = MutableStateFlow(emptyList<Message>())
+    val chatMessages:StateFlow<List<Message>> = _chatMessages
+
+    fun chat(message:Message){
         viewModelScope.launch {
+            _chatMessages.value += message
+            Log.d("TAG", "chat: ${_chatMessages.value}")
             withContext(Dispatchers.IO) {
                 try {
-                    SocketModule.out?.println("chat/${OnlineGame.gameId}/${UserData.account}/$message")
+                    SocketModule.out?.println("chat/${OnlineGame.gameId}/${UserData.account}/${message.text}")
                 } catch (e: Exception) {
                     Log.d("TAGdasdsadasda", "sendMessage: ${e.message}")
                 }
@@ -123,7 +130,9 @@ class OnlineGamePageViewModel @Inject constructor(private val matchService: Matc
             _isEnemySubmit.value = true
         }
         if (message.contains("chat")){
-
+            val split = message.split("/")
+            val text = split[1]
+            _chatMessages.value += Message(text,false)
         }
     }
 

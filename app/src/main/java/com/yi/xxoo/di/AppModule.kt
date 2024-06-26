@@ -21,6 +21,7 @@ import com.yi.xxoo.Room.user.UserDao
 import com.yi.xxoo.Room.user.UserDatabase
 import com.yi.xxoo.network.gameHistory.GameHistoryService
 import com.yi.xxoo.network.match.MatchService
+import com.yi.xxoo.network.user.UserService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -82,6 +83,12 @@ object AppModule {
     @Provides
     fun provideMatchService(retrofit: Retrofit): MatchService{
         return retrofit.create(MatchService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideUserService(retrofit: Retrofit): UserService {
+        return retrofit.create(UserService::class.java)
     }
 
     @Singleton

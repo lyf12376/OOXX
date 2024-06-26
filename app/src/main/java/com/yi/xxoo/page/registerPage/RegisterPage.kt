@@ -26,6 +26,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -67,7 +68,6 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
         mutableStateOf("")
     }
     var account by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
     var isAccountFocused by remember { mutableStateOf(false) }
     var password by remember {
         mutableStateOf("")
@@ -78,8 +78,53 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
     var remainingSeconds by remember {
         mutableIntStateOf(30)
     }
+    val sendSuccess = registerViewModel.sendSuccess.collectAsState()
+    val sendFailed = registerViewModel.sendFailed.collectAsState()
+    val registerSuccess = registerViewModel.registerSuccess.collectAsState()
+    val registerFailed = registerViewModel.registerFailed.collectAsState()
+
     val textWidth = 300.dp
     val textHeight = 54.dp
+
+    LaunchedEffect (sendSuccess.value){
+        if (sendSuccess.value){
+            isSending = true
+        }
+    }
+    if (sendFailed.value){
+        AlertDialog(
+            onDismissRequest = { registerViewModel.setSendFailed() },
+            title = { Text("发送错误") },
+            text = { Text("验证码发送错误，请检查网络重试。") },
+            confirmButton = {
+                Button(onClick = { registerViewModel.setSendFailed() }) {
+                    Text("确定")
+                }
+            }
+        )
+    }
+
+    if (registerFailed.value){
+        AlertDialog(
+            onDismissRequest = { registerViewModel.setRegisterFailed() },
+            title = { Text("注册失败") },
+            text = { Text("注册失败，请检查验证码是否正确或者网络。") },
+            confirmButton = {
+                Button(onClick = { registerViewModel.setRegisterFailed() }) {
+                    Text("确定")
+                }
+            }
+        )
+    }
+    LaunchedEffect (registerSuccess.value){
+        if (registerSuccess.value)
+        {
+            navController.navigate("DocumentPage"){
+                popUpTo("RegisterPage")
+            }
+        }
+    }
+
 
     Box(
         Modifier
@@ -100,7 +145,7 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
                 contentDescription = "返回",
                 Modifier
                     .padding(start = 16.dp)
-                    .clickable { navController.navigate("LoginPage") }
+                    .clickable { navController.popBackStack() }
             )
             Box(
                 modifier = Modifier
@@ -258,7 +303,7 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
                                         showDialog = true
                                     } else {
                                         isSending = true
-//                                        registerViewModel.sendMail(Captcha(toUserMail = account, where = "regist"))
+                                        registerViewModel.sendMail(email = account)
                                     }
                                 }
                             }, shape = RoundedCornerShape(0.dp),
@@ -337,7 +382,7 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
             onClick = {
                 runBlocking {
                     scope1.launch {
-//                        registerViewModel.register(User(nickName = "", phoneNumber = "", email = account, password = password, code = inputCaptcha))
+                        registerViewModel.register(account,password,inputCaptcha)
                     }.join() // 等待协程结束
                     // 协程结束后进行判断
                 }

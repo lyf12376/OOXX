@@ -37,7 +37,7 @@ class MatchViewModel @Inject constructor(
     }
 
     suspend fun getUserData() {
-        UserData.setUser(userDao.getUserByEmail("account1"))
+        UserData.setUser(userDao.getUserByEmail("account"))
     }
 
     //计时器
@@ -126,6 +126,8 @@ class MatchViewModel @Inject constructor(
             }
         }
     }
+
+
 
     private fun listenForMessages() {
         viewModelScope.launch {

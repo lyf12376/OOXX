@@ -9,6 +9,7 @@ import androidx.room.PrimaryKey
 )
 data class GameTimeRank(
     val rank : Int,
+    val userAccount:String,
     val userName : String,
     val time : String
 )
