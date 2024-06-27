@@ -13,7 +13,7 @@ interface MatchService {
     fun matching(@Body rankGameRequest: RankGameRequest): Flow<MatchResponse>
 
     @POST("/game/rank/cancel")
-    fun cancel(@Body rankGameRequest: RankGameRequest):CancelResponse
+    suspend fun cancel(@Body rankGameRequest: RankGameRequest):CancelResponse
 
     @POST("/game/rank/submit")
     suspend fun submit(@Body playerSettlement: PlayerSettlement):SubmitResponse

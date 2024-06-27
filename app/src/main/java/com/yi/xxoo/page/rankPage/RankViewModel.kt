@@ -6,13 +6,20 @@ import com.yi.xxoo.Room.rank.passNum.PassNumRank
 import com.yi.xxoo.Room.rank.passNum.PassNumRankDao
 import com.yi.xxoo.Room.rank.time.GameTimeRank
 import com.yi.xxoo.Room.rank.time.GameTimeRankDao
+import com.yi.xxoo.network.gameTime.GameTimeService
+import com.yi.xxoo.network.passNumRank.PassNumRankService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class RankViewModel @Inject constructor(private val passNumRankDao: PassNumRankDao,private val gameTimeRankDao: GameTimeRankDao):ViewModel(){
+class RankViewModel @Inject constructor(
+    private val passNumRankDao: PassNumRankDao,
+    private val gameTimeRankDao: GameTimeRankDao,
+    private val passNumRankService: PassNumRankService,
+    private val gameTimeService: GameTimeService
+):ViewModel(){
     private var passNumRankList = getAllPassNumRankList()
     private var gameTimeRankList = getAllGameTimeRankList()
 
@@ -20,7 +27,7 @@ class RankViewModel @Inject constructor(private val passNumRankDao: PassNumRankD
     val gameTimeRankListFlow: Flow<List<GameTimeRank>> get() = gameTimeRankList
 
     private fun getAllPassNumRankList(): Flow<List<PassNumRank>> {
-        return passNumRankDao.getPassNumRank()
+        return passNumRankService.getPassNumRank()
     }
 
     private fun getAllGameTimeRankList(): Flow<List<GameTimeRank>> {

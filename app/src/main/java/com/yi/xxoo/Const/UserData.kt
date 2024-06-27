@@ -10,8 +10,9 @@ object UserData {
     var coin : Int = 0
     var email : String = ""
     var photo : String = ""
-    var achievement : String = ""
+    var achievement : String = "000"
     var rank : Int = 0
+    var rankWin:Int = 0
     var gameTimes : Int = 0
     var time : Int = 0
     var bestRecord: ArrayList<Int> = arrayListOf()
@@ -26,9 +27,27 @@ object UserData {
         photo = userData.photo
         achievement = userData.achievement
         rank = userData.rank
+        rankWin = userData.rankWin
         gameTimes = userData.gameTimes
         time = userData.time
         bestRecord = userData.bestRecord.stringToPersonalBestRecord()
         passNum = userData.passNum
+    }
+
+    fun resetUserData()
+    {
+        name = ""
+        account = ""
+        password = ""
+        coin = 0
+        email = ""
+        photo = ""
+        achievement = "000"
+        rank = 0
+        rankWin = 0
+        gameTimes = 0
+        time = 0
+        bestRecord = arrayListOf()
+        passNum = 0
     }
 }

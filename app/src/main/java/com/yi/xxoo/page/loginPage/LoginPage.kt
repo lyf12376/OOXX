@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.yi.xxoo.R
 import com.yi.xxoo.Room.savedUser.SavedUser
 import com.yi.xxoo.navigation.Screen
@@ -70,13 +71,11 @@ fun LoginPage(
     }
     var account by remember { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
-    var isAccountFocused by remember { mutableStateOf(false) }
     var password by remember {
         mutableStateOf("")
     }
     val textWidth = 320.dp
     val textHeight = 50.dp
-    var navigate = false
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
     val loginSuccess = loginViewModel.loginSuccess.collectAsState()
@@ -87,7 +86,7 @@ fun LoginPage(
     val startOfflineGame = loginViewModel.startOfflineGame.collectAsState()
     val registerOfflineAccount = loginViewModel.registerOfflineAccount.collectAsState()
     val context = LocalContext.current
-
+    val systemUiController = rememberSystemUiController()
 
     if (!network.value){
         AlertDialog(
@@ -116,24 +115,36 @@ fun LoginPage(
             }
         )
     }
+    LaunchedEffect (true){
+        systemUiController.setSystemBarsColor(
+            color = Color.Transparent,
+            darkIcons = false
+        )
+    }
     LaunchedEffect (startOfflineGame.value){
         if (startOfflineGame.value){
-            navController.navigate(Screen.LevelPage.route){
-                popUpTo(Screen.LoginPage.route)
+            navController.navigate(Screen.MinePage.route){
+                popUpTo(Screen.LoginPage.route){
+                    inclusive = true
+                }
             }
         }
     }
     LaunchedEffect (registerOfflineAccount.value){
         if (registerOfflineAccount.value){
             navController.navigate(Screen.DocumentPage.route){
-                popUpTo(Screen.LoginPage.route)
+                popUpTo(Screen.LoginPage.route){
+                    inclusive = true
+                }
             }
         }
     }
     LaunchedEffect(loginSuccess.value) {
         if (loginSuccess.value) {
             navController.navigate("MinePage") {
-                popUpTo("LoginPage")
+                popUpTo("LoginPage"){
+                    inclusive = true
+                }
             }
         }
     }
@@ -149,16 +160,6 @@ fun LoginPage(
             .statusBarsPadding()
             .navigationBarsPadding()
     ) {
-        Image(
-            painterResource(id = R.drawable.back1),
-            contentDescription = "返回",
-            modifier = Modifier
-                .align(Alignment.Start)
-                .noRippleClickable {
-
-                }
-                .padding(16.dp)
-        )
         Spacer(modifier = Modifier.height(96.dp))
         Image(
             painterResource(id = R.drawable.login_icon),
@@ -169,7 +170,7 @@ fun LoginPage(
         )
         Spacer(modifier = Modifier.height(18.dp))
         Text(
-            text = "A Discussion", modifier = Modifier.align(Alignment.CenterHorizontally),
+            text = "OOXX——Game", modifier = Modifier.align(Alignment.CenterHorizontally),
             fontSize = 24.sp,
             fontFamily = FontFamily(Font(R.font.cute)),
             color = Color("#b9b9b9".toColorInt())
@@ -247,7 +248,7 @@ fun LoginPage(
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                modifier = androidx.compose.ui.Modifier.width(textWidth) // 这里的宽度应该和你的TextField的宽度一样
+                modifier = Modifier.width(textWidth) // 这里的宽度应该和你的TextField的宽度一样
             ) {
                 savedUserList.value.forEach { savedUser ->
                     DropdownMenuItem(text = { Text(text = savedUser.account) },

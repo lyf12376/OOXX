@@ -8,6 +8,7 @@ import com.yi.xxoo.Room.user.User
 import com.yi.xxoo.Room.user.UserDao
 import com.yi.xxoo.network.gameHistory.GameHistoryResponse
 import com.yi.xxoo.network.gameHistory.GameHistoryService
+import com.yi.xxoo.network.user.UserService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -15,7 +16,8 @@ import javax.inject.Inject
 class MineViewModel @Inject constructor(
     private val userDao: UserDao,
     private val gameDao: GameDao,
-    private val historyService: GameHistoryService
+    private val historyService: GameHistoryService,
+    private val userService: UserService
 ) : ViewModel() {
 
     suspend fun getUserData() {
@@ -35,4 +37,6 @@ class MineViewModel @Inject constructor(
     suspend fun getUserHistory(): GameHistoryResponse {
         return historyService.getGameHistory(UserData.account)
     }
+
+
 }

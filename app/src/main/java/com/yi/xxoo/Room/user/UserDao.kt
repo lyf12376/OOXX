@@ -61,4 +61,6 @@ interface UserDao {
     @Query("select passNum from UserData where email = :email")
     fun getUserPassNum(email: String): Flow<Int>
 
+    @Query("select * from UserData where email = :email")
+    suspend fun isExist(email: String): User?
 }

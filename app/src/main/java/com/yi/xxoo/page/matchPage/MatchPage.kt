@@ -17,8 +17,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -64,9 +66,6 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hiltViewModel()) {
-    CoroutineScope(Dispatchers.IO).launch {
-        matchViewModel.getUserData()
-    }
     val matchResponse by matchViewModel.message.collectAsState()
     val matchSuccess = matchViewModel.matched.collectAsState()
     val startGame = matchViewModel.startGame.collectAsState()
@@ -120,53 +119,63 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
             .background(Color("#EFEFEF".toColorInt()))
     )
 
-    Column(Modifier.fillMaxSize()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Transparent)
-        ) {
-            IconButton(
-                onClick = { navController.popBackStack() }, modifier = Modifier
-                    .padding(18.dp)
-                    .size(36.dp)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ){
+        Column(
+            Modifier
+                .fillMaxSize()
+                .navigationBarsPadding()
+                .statusBarsPadding()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.Transparent)
             ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "退出",
-                    modifier = Modifier
+                IconButton(
+                    onClick = { navController.popBackStack() }, modifier = Modifier
+                        .padding(18.dp)
                         .size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowBack,
+                        contentDescription = "退出",
+                        modifier = Modifier
+                            .size(36.dp)
+                    )
+                }
+                Text(
+                    text = "排位", modifier = Modifier
+                        .padding(18.dp)
+                        .align(Alignment.CenterVertically), fontSize = 24.sp
                 )
             }
-            Text(
-                text = "排位", modifier = Modifier
-                    .padding(18.dp)
-                    .align(Alignment.CenterVertically), fontSize = 24.sp
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(600.dp), contentAlignment = Alignment.Center
+            ) {
+                UserContent(UserData.name)
+            }
+            Spacer(modifier = Modifier.height(36.dp))
+
+            RepeatingRippleButton(
+                modifier = Modifier
+                    .width(300.dp)
+                    .height(60.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+
+            TimerScreen(
+                Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .align(Alignment.CenterHorizontally)
             )
         }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(600.dp), contentAlignment = Alignment.Center
-        ) {
-            UserContent(UserData.name)
-        }
-        Spacer(modifier = Modifier.height(36.dp))
-
-        RepeatingRippleButton(
-            modifier = Modifier
-                .width(300.dp)
-                .height(60.dp)
-                .align(Alignment.CenterHorizontally)
-        )
-
-        TimerScreen(
-            Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .align(Alignment.CenterHorizontally)
-        )
     }
+
 
     //接受匹配动画
     Box {
@@ -263,15 +272,16 @@ fun UserContent(name:String) {
 @Composable
 fun RepeatingRippleButton(modifier: Modifier, matchViewModel: MatchViewModel = hiltViewModel()) {
     val interactionSource = remember { MutableInteractionSource() }
-    var isRippleActive by remember { mutableStateOf(false) }
+
     val isRunning by matchViewModel.isRunning.collectAsState()
+    var isRippleActive by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(isRippleActive) {
-        if (!isRippleActive) {
+    LaunchedEffect(isRunning) {
+        if (!isRunning) {
             interactionSource.clearRipples()
         }
-        while (isRippleActive) {
+        while (isRunning) {
             interactionSource.emitPress()
             delay(500) // 控制波纹效果的频率
             interactionSource.emitRelease()
@@ -285,17 +295,13 @@ fun RepeatingRippleButton(modifier: Modifier, matchViewModel: MatchViewModel = h
                 .clip(RoundedCornerShape(24.dp)) // 使用 dp 而不是 float
                 .background(Color("#99EBFF".toColorInt()))
                 .clickable {
-                    isRippleActive = !isRippleActive
-                    if (isRippleActive) {
-                        matchViewModel.matching()
-                    } else {
-                        matchViewModel.cancel()
-                    }
-
                     if (isRunning) {
+                        matchViewModel.cancel()
                         matchViewModel.resetTimer()
-                    } else
+                    } else {
+                        matchViewModel.matching()
                         matchViewModel.startTimer()
+                    }
                 }
                 .indication(
                     interactionSource = interactionSource,

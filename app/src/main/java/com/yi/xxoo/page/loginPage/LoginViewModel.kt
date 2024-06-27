@@ -44,6 +44,10 @@ class LoginViewModel @Inject constructor(private val savedUserDao: SavedUserDao,
     val registerOfflineAccount:StateFlow<Boolean> = _registerOfflineAccount
 
 
+    fun setNetWork()
+    {
+        _network.value = true
+    }
 
     fun reConnect(context: Context){
         _network.value = true
@@ -51,6 +55,7 @@ class LoginViewModel @Inject constructor(private val savedUserDao: SavedUserDao,
     }
 
     fun offlineMode(){
+        setNetWork()
         viewModelScope.launch {
             val user = userDao.login("offline","offline")
             if (user!=null){
@@ -76,7 +81,10 @@ class LoginViewModel @Inject constructor(private val savedUserDao: SavedUserDao,
                     {
                         _loginSuccess.value = true
                         UserData.setUser(loginResponse.data!!)
-                        userDao.createUser(loginResponse.data)
+                        if (userDao.isExist(loginResponse.data.account) == null)
+                            userDao.createUser(loginResponse.data)
+                        else
+                            userDao.updateUser(loginResponse.data)
                     }
                     else{
                         _loginFailed.value = true

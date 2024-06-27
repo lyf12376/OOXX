@@ -82,6 +82,7 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
     val sendFailed = registerViewModel.sendFailed.collectAsState()
     val registerSuccess = registerViewModel.registerSuccess.collectAsState()
     val registerFailed = registerViewModel.registerFailed.collectAsState()
+    val error = registerViewModel.error.collectAsState()
 
     val textWidth = 300.dp
     val textHeight = 54.dp
@@ -90,6 +91,18 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
         if (sendSuccess.value){
             isSending = true
         }
+    }
+    if (error.value == 1 || error.value == 2){
+        AlertDialog(
+            onDismissRequest = { registerViewModel.setError() },
+            title = { Text("注册") },
+            text = { Text(if (error.value == 1) "验证码错误，请重试" else "邮箱已被注册，请更换邮箱") },
+            confirmButton = {
+                Button(onClick = { registerViewModel.setError() }) {
+                    Text("确定")
+                }
+            }
+        )
     }
     if (sendFailed.value){
         AlertDialog(
@@ -120,7 +133,9 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
         if (registerSuccess.value)
         {
             navController.navigate("DocumentPage"){
-                popUpTo("RegisterPage")
+                popUpTo("RegisterPage"){
+                    inclusive = true
+                }
             }
         }
     }

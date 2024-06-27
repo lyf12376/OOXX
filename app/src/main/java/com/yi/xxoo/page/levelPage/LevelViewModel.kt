@@ -2,18 +2,22 @@ package com.yi.xxoo.page.levelPage
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yi.xxoo.Const.GameMode
 import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.Room.game.GameDao
 import com.yi.xxoo.Room.user.UserDao
+import com.yi.xxoo.network.user.UserService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
-class LevelViewModel @Inject constructor(private val userDao: UserDao, private val gameDao: GameDao) : ViewModel() {
+class LevelViewModel @Inject constructor(private val userDao: UserDao, private val gameDao: GameDao,private val userService: UserService) : ViewModel() {
     private val _coin = MutableStateFlow(0)
     val coin: StateFlow<Int> = _coin
 
@@ -26,7 +30,7 @@ class LevelViewModel @Inject constructor(private val userDao: UserDao, private v
     private fun observeUserCoins() {
         // 从Dao获取Flow<Int>，并在viewModelScope中收集
         viewModelScope.launch {
-            userDao.getUserCoin(UserData.email).collect { coins ->
+            userDao.getUserCoin(UserData.account).collect { coins ->
                 // 更新StateFlow的值
                 _coin.value = coins
             }
@@ -38,7 +42,7 @@ class LevelViewModel @Inject constructor(private val userDao: UserDao, private v
 
     private fun observeUserPassNum() {
         viewModelScope.launch {
-            userDao.getUserPassNum(UserData.email).collect { passNum ->
+            userDao.getUserPassNum(UserData.account).collect { passNum ->
                 _passNum.value = passNum
             }
         }
@@ -47,10 +51,20 @@ class LevelViewModel @Inject constructor(private val userDao: UserDao, private v
     // 通过Dao更新用户硬币数量
     fun unLockGame(coin: Int) {
         viewModelScope.launch {
-            userDao.updateUserCoin(UserData.email, coin)
+            userDao.updateUserCoin(UserData.account, coin)
             UserData.coin = coin
-            userDao.updateUserPassNum(UserData.passNum+1,UserData.email)
+            userDao.updateUserPassNum(UserData.passNum+1,UserData.account)
             UserData.passNum += 1
+            if (GameMode.isNetworkEnabled) {
+                try {
+                    withContext(Dispatchers.IO) {
+                        userService.updateUserCoin(UserData.account, coin)
+                        userService.updateUserPassNum(UserData.account, UserData.passNum)
+                    }
+                }catch (e:Exception){
+                    e.printStackTrace()
+                }
+            }
         }
     }
 

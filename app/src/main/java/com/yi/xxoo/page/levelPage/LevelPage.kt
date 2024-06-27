@@ -15,8 +15,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -50,22 +53,31 @@ import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.yi.xxoo.Const.GameMode
+import com.yi.xxoo.Const.ScreenData
 import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
+import com.yi.xxoo.navigation.Screen
+import com.yi.xxoo.page.matchPage.MatchPage
 import com.yi.xxoo.utils.GameUtils
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LevelPage(navController: NavController) {
     Column (modifier = Modifier.fillMaxSize()){
-        LevelSelectionScreen(navController)
+        LevelSelectionScreen(
+            navController,
+            scroll = {
+                navController.navigate(Screen.MatchPage.route)
+            }
+        )
     }
 }
 
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LevelSelectionScreen(navController: NavController,levelViewModel: LevelViewModel = hiltViewModel()) {
+fun LevelSelectionScreen(navController: NavController,scroll:()->Unit,levelViewModel: LevelViewModel = hiltViewModel()) {
     val games = levelViewModel.gameList.collectAsState(initial = listOf())
 
     val pagerState = rememberPagerState(
@@ -102,6 +114,7 @@ fun LevelSelectionScreen(navController: NavController,levelViewModel: LevelViewM
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .navigationBarsPadding()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
@@ -113,16 +126,33 @@ fun LevelSelectionScreen(navController: NavController,levelViewModel: LevelViewM
                 .padding(16.dp),
             contentAlignment = Alignment.TopEnd
         ) {
+
             Row {
-                Icon(painterResource(id = R.drawable.coin), contentDescription = "金币数量", modifier = Modifier.size(48.dp) ,tint = Color.Unspecified)
+                Button(onClick = { scroll() }, modifier = Modifier.align(Alignment.CenterVertically)) {
+                    Text(
+                        text = "联机模式",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier
+                            .padding(8.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(painterResource(id = R.drawable.coin), contentDescription = "金币数量", modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .size(48.dp) ,tint = Color.Unspecified)
                 Text(
                     text = "Coins: ${coins.value}",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier
                         .padding(8.dp)
+                        .align(Alignment.CenterVertically)
                 )
             }
+
+
+
 
         }
 
@@ -230,7 +260,11 @@ fun LevelSelectionScreen(navController: NavController,levelViewModel: LevelViewM
 //        )
 //        Image(painterResource(id = R.drawable.wb), contentDescription = "世界排行", modifier = Modifier.size(80.dp))
         LevelPageNavigation{
-            navController.navigate("MinePage")
+            navController.navigate("MinePage"){
+                popUpTo("LevelPage"){
+                    inclusive = true
+                }
+            }
         }
     }
 }

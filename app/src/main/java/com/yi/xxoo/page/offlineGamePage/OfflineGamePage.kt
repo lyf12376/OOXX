@@ -17,14 +17,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -51,6 +54,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.yi.xxoo.Const.GameMode
 import com.yi.xxoo.Const.ScreenData
 import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
@@ -87,10 +91,26 @@ fun OfflineGamePage(navController: NavController, level:Int, offlineGameViewMode
     val game = gameDetail ?: return
     val init = GameUtils.expandStringToNxNList(game.init)
     val now = remember { mutableStateOf(init.map { it.toMutableList() }.toMutableList()) }
+    val submitFailed = offlineGameViewModel.submitFailed
 
+    if (submitFailed.value){
+        AlertDialog(
+            onDismissRequest = { offlineGameViewModel.reSubmit() },
+            title = { Text("错误") },
+            text = { Text("答案错误，请检查重试") },
+            confirmButton = {
+                Button(onClick = { offlineGameViewModel.reSubmit() }) {
+                    Text("确定")
+                }
+            }
+        )
+    }
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
+            .statusBarsPadding()
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Icon(
@@ -329,7 +349,8 @@ fun Timer(modifier: Modifier, time:Int) {
 }
 
 @Composable
-fun Record(level: Int) {
+fun Record(level: Int,offlineGameViewModel: OfflineGameViewModel = hiltViewModel()) {
+    val worldBest = offlineGameViewModel.worldBest.collectAsState()
     Row(modifier = Modifier.fillMaxWidth()) {
         Box(
             modifier = Modifier
@@ -337,7 +358,7 @@ fun Record(level: Int) {
                 .weight(1f)
         ) {
             Text(
-                text = "WB: Fast",
+                text = if(GameMode.isNetworkEnabled) "WB: ${worldBest.value}" else "WB: 请联机查看",
                 fontSize = 20.sp,
                 modifier = Modifier
                     .padding(16.dp)

@@ -112,7 +112,9 @@ fun DocumentPage(navController: NavController, documentViewModel: DocumentViewMo
     LaunchedEffect (editSuccess.value){
         if (editSuccess.value == 2){
             navController.navigate("MinePage"){
-                popUpTo("DocumentPage")
+                popUpTo("DocumentPage"){
+                    inclusive = true
+                }
             }
         }
     }
@@ -163,7 +165,7 @@ fun DocumentPage(navController: NavController, documentViewModel: DocumentViewMo
                 Modifier
                     .padding(start = 16.dp)
                     .align(Alignment.CenterVertically)
-                    .clickable { navController.navigate("main") }
+                    .clickable { navController.popBackStack() }
             )
             Box(
                 modifier = Modifier
@@ -365,12 +367,8 @@ fun DocumentPage(navController: NavController, documentViewModel: DocumentViewMo
                     showDialog1 = true
                 }
                 else {
-                    if (GameMode.isNetworkEnabled){
-                        file?.let { documentViewModel.updateAvatar(it) }
-                        documentViewModel.updateName(name)
-                    }else{
-
-                    }
+                    file?.let { documentViewModel.updateAvatar(it) }
+                    documentViewModel.updateName(name)
                 }
             },
             shape = RoundedCornerShape(0.dp),

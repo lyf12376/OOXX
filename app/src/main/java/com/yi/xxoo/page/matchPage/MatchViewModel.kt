@@ -32,6 +32,10 @@ class MatchViewModel @Inject constructor(
     private val matchService: MatchService,
     private val userDao: UserDao,
 ) : ViewModel() {
+
+    init {
+        Log.d("TAG", ": creat")
+    }
     suspend fun creatUser(){
         userDao.createUser(User("name","account","password","account",photo = "",bestRecord = "123,45"))
     }
@@ -72,10 +76,15 @@ class MatchViewModel @Inject constructor(
         //viewModelScope默认主线程
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                // 在IO线程执行网络请求
-                matchService.matching(RankGameRequest(UserData.account, UserData.name,0)).collect {
-                    _message.value = it
+                try {
+                    // 在IO线程执行网络请求
+                    matchService.matching(RankGameRequest(UserData.account, UserData.name,0)).collect {
+                        _message.value = it
+                    }
+                }catch (e:Exception){
+                    Log.d("TAG", "matching: ${e.message}")
                 }
+
             }
         }
     }
@@ -83,8 +92,12 @@ class MatchViewModel @Inject constructor(
     fun cancel() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                // 在IO线程执行网络请求
-                matchService.cancel(RankGameRequest(UserData.account, UserData.name,0))
+                try {
+                    // 在IO线程执行网络请求
+                    matchService.cancel(RankGameRequest(UserData.account, UserData.name,0))
+                }catch (e:Exception){
+                    Log.d("TAG", "matching: ${e.message}")
+                }
             }
         }
     }
@@ -184,6 +197,7 @@ class MatchViewModel @Inject constructor(
     }
 
     fun rejectMatch() {
+        _rejected.value = true
         sendMessage("rejected/${UserData.account}")
     }
 

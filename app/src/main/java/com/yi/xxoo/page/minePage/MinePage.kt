@@ -18,11 +18,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +39,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.yi.xxoo.Const.GameMode
 import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
 import com.yi.xxoo.page.loginPage.noRippleClickable
@@ -52,6 +58,29 @@ object MySize {
 @Composable
 fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltViewModel()) {
     val coroutineScope = rememberCoroutineScope()
+    val systemUiController = rememberSystemUiController()
+
+    val showDialog = remember{
+        mutableStateOf(false)
+    }
+    if (showDialog.value){
+        AlertDialog(
+            onDismissRequest = { showDialog.value = false },
+            title = { Text("无法查看") },
+            text = { Text("你正处于离线模式请在线模式查看") },
+            confirmButton = {
+                Button(onClick = { showDialog.value = false }) {
+                    Text("确定")
+                }
+            }
+        )
+    }
+    LaunchedEffect (true){
+        systemUiController.setSystemBarsColor(
+            color = Color.Transparent,
+            darkIcons = true
+        )
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
@@ -75,13 +104,28 @@ fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltVie
                 }
                 Divider()
                 rank {
-                    navController.navigate("RankPage")
+                    if (GameMode.isNetworkEnabled)
+                        navController.navigate("RankPage")
+                    else{
+                        showDialog.value = true
+                    }
+                }
+                Divider()
+                logOut {
+                    UserData.resetUserData()
+                    navController.navigate("LoginPage"){
+                        popUpTo("MinePage"){
+                            inclusive = true
+                        }
+                    }
                 }
             }
         }
 
     }
-    Box(modifier = Modifier.fillMaxSize().navigationBarsPadding()){
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .navigationBarsPadding()){
         MinePageNavigation(
             Modifier
                 .align(Alignment.BottomCenter)
@@ -100,7 +144,7 @@ fun photo() {
             .padding(MySize.photoPadding)
             .size(MySize.photoSize))
         Text(
-            text = "name", fontSize = MySize.nameSize, modifier = Modifier
+            text = UserData.name, fontSize = MySize.nameSize, modifier = Modifier
                 .padding(MySize.ItemPadding)
                 .align(Alignment.CenterVertically)
         )
@@ -213,6 +257,37 @@ fun rank(unit:()->Unit)
     }
 
 }
+
+@Composable
+fun logOut(unit:()->Unit)
+{
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .clickable {
+                unit()
+            }
+    ) {
+        Image(
+            painterResource(id = R.drawable.log_out),
+            contentDescription = "退出登录",
+            modifier = Modifier
+                .padding(MySize.ItemPadding)
+                .size(MySize.iconSize)
+        )
+        Text(
+            text = "退出登录", fontSize = MySize.textSize, modifier = Modifier
+                .padding(MySize.ItemPadding)
+                .align(Alignment.CenterVertically)
+                .weight(1f)
+        )
+
+    }
+
+}
+
+
 @Composable
 fun MinePageNavigation(modifier: Modifier,unit:()->Unit)
 {

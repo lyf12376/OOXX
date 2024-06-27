@@ -4,7 +4,9 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.room.Insert
+import com.yi.xxoo.Const.GameMode
 import com.yi.xxoo.Const.UserData
+import com.yi.xxoo.Room.user.UserDao
 import com.yi.xxoo.network.user.UserService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -21,7 +23,7 @@ import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
-class DocumentViewModel @Inject constructor(private val userService: UserService): ViewModel(){
+class DocumentViewModel @Inject constructor(private val userService: UserService,private val userDao: UserDao): ViewModel(){
 
     private val _editSuccess = MutableStateFlow(0)
     val editSuccess:StateFlow<Int> = _editSuccess
@@ -33,35 +35,69 @@ class DocumentViewModel @Inject constructor(private val userService: UserService
     val nameFailed:StateFlow<Boolean> = _nameFailed
 
     fun updateAvatar(file:File) {
-        try {
-            val requestFile: RequestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
-            val body: MultipartBody.Part = MultipartBody.Part.createFormData("avatar", file.name, requestFile)
-            viewModelScope.launch {
-                withContext(Dispatchers.IO){
-                    val userResponse = userService.updateUserAvatar(UserData.account,body)
-                    if (userResponse.code == 200){
-                        UserData.photo = userResponse.data
-                        _editSuccess.value ++
-                    }else{
-                        _avatarFailed.value = true
+        if (GameMode.isNetworkEnabled){
+            try {
+                val requestFile: RequestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
+                val body: MultipartBody.Part = MultipartBody.Part.createFormData("avatar", file.name, requestFile)
+                viewModelScope.launch {
+                    withContext(Dispatchers.IO){
+                        val userResponse = userService.updateUserAvatar(UserData.account,body)
+                        if (userResponse.code == 200){
+                            UserData.photo = userResponse.data
+                            _editSuccess.value ++
+                        }else{
+                            _avatarFailed.value = true
+                        }
                     }
                 }
+            }catch (e:Exception){
+                Log.e("TAG", "updateAvatar: ${e.message}" )
             }
-        }catch (e:Exception){
-            Log.e("TAG", "updateAvatar: ${e.message}" )
+        }else{
+            try {
+                viewModelScope.launch {
+                    withContext(Dispatchers.IO){
+                        userDao.updateUserPhoto(UserData.account,file.absolutePath)
+                        UserData.photo = file.absolutePath
+                        _editSuccess.value ++
+                        Log.d("TAG", "updateAvatar: ${file.absolutePath}")
+                    }
+                }
+            }catch (e:Exception){
+                Log.e("TAG", "updateAvatar: ${e.message}" )
+            }
         }
+
     }
 
-    fun updateName(name:String){
-        viewModelScope.launch {
-            withContext(Dispatchers.IO){
-                val userResponse = userService.updateName(UserData.account,name)
-                if (userResponse.code == 200){
-                    UserData.name = name
-                    _editSuccess.value ++
-                }else{
-                    _nameFailed.value = true
+    fun updateName(name:String) {
+        if (GameMode.isNetworkEnabled) {
+            try {
+                viewModelScope.launch {
+                    withContext(Dispatchers.IO) {
+                        val userResponse = userService.updateName(UserData.account, name)
+                        if (userResponse.code == 200) {
+                            UserData.name = name
+                            _editSuccess.value++
+                        } else {
+                            _nameFailed.value = true
+                        }
+                    }
                 }
+            }catch (e:Exception){
+                Log.e("TAG", "updateName: ${e.message}" )
+            }
+        }else{
+            try {
+                viewModelScope.launch {
+                    withContext(Dispatchers.IO){
+                        userDao.updateUserName(UserData.account,name)
+                        UserData.name = name
+                        _editSuccess.value ++
+                    }
+                }
+            }catch (e:Exception){
+                Log.e("TAG", "updateName: ${e.message}" )
             }
         }
     }

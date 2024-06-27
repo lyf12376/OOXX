@@ -4,41 +4,67 @@ import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yi.xxoo.Const.GameMode
 import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.Room.game.Game
 import com.yi.xxoo.Room.game.GameDao
 import com.yi.xxoo.Room.rank.worldBest.WorldBestRecord
 import com.yi.xxoo.Room.rank.worldBest.WorldBestRecordDao
 import com.yi.xxoo.Room.user.UserDao
+import com.yi.xxoo.network.user.UserService
+import com.yi.xxoo.network.worldBest.WorldBestService
 import com.yi.xxoo.utils.RoomUtils.personalBestRecordToString
 import com.yi.xxoo.utils.SoundManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class OfflineGameViewModel @Inject constructor(
     private val gameDao: GameDao,
     private val worldBestRecordDao: WorldBestRecordDao,
-    private val userDao: UserDao
+    private val userDao: UserDao,
+    private val userService: UserService,
+    private val worldBestService: WorldBestService
 ) : ViewModel() {
 
     private var gameList : Flow<List<Game>> = getAllGames()
     //val gameList: List<Game> get() = _gameList
     val personalBest = UserData.bestRecord
 
-
-
     //游戏内容
-    var worldBest = ""
+    private val _worldBest = MutableStateFlow("")
+    val worldBest:StateFlow<String> = _worldBest
+
     var target = ""
 
     private val _gameSuccess = MutableStateFlow(false)
     val gameSuccess: StateFlow<Boolean> = _gameSuccess
 
+    private val _submitFailed = MutableStateFlow(false)
+    val submitFailed:StateFlow<Boolean> = _submitFailed
+
+    fun getWorldBest(level: Int){
+        try {
+            viewModelScope.launch {
+                withContext(Dispatchers.IO){
+                    val worldBestResponse = worldBestService.getWorldBestByLevel(level)
+                    _worldBest.value = "${worldBestResponse.data.time}   ${worldBestResponse.data.userName}"
+                }
+            }
+        }catch (e:Exception){
+            Log.d("TAG", "getWorldBest: ${e.message}")
+        }
+    }
+
+    fun reSubmit(){
+        _submitFailed.value = false
+    }
 
     private fun getAllGames(): Flow<List<Game>> {
         return gameDao.getAllGames()
@@ -73,8 +99,17 @@ class OfflineGameViewModel @Inject constructor(
                     UserData.bestRecord[level-1] = time
                     Log.d("TAG", "check: success")
                     userDao.updateBestRecordByEmail(UserData.email,UserData.bestRecord.personalBestRecordToString())
+                    if (GameMode.isNetworkEnabled){
+                        try {
+                            withContext(Dispatchers.IO){
+                                worldBestService.insertWorldBest(WorldBestRecord(level,UserData.account,UserData.name,time))
+                                userService.updateBestRecord(UserData.email,UserData.bestRecord.personalBestRecordToString())
+                            }
+                        }catch (e:Exception){
+                            e.printStackTrace()
+                        }
+                    }
                     _gameSuccess.value = true
-
                 }else{
                     _gameSuccess.value = true
                 }
@@ -83,8 +118,20 @@ class OfflineGameViewModel @Inject constructor(
                     UserData.passNum = level
                     userDao.updateUserCoin(UserData.email,UserData.coin+10)
                     UserData.coin += 10
-                }
+                    if (GameMode.isNetworkEnabled){
+                        try {
+                            withContext(Dispatchers.IO){
+                                userService.updateUserPassNum(UserData.email,UserData.passNum)
+                                userService.updateUserCoin(UserData.email,UserData.coin)
+                            }
+                        }catch (e:Exception){
+                            e.printStackTrace()
+                        }
 
+                    }
+                }
+            }else{
+                _submitFailed.value = true
             }
         }
 

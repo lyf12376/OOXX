@@ -10,5 +10,5 @@ data class  WorldBestRecord(
     val whichGame : Int,
     val userAccount:String,
     val userName : String,
-    val time : String
+    val time : Int
 )

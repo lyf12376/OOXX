@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Icon
@@ -36,7 +38,7 @@ fun AchievementPage(navController: NavController)
     val isTwoAchieved = UserData.achievement[1] == '1'
     val isThreeAchieved = UserData.achievement[2] == '1'
 
-    Column (modifier = Modifier.fillMaxSize()){
+    Column (modifier = Modifier.fillMaxSize().statusBarsPadding().navigationBarsPadding()){
         Row (modifier = Modifier.fillMaxWidth()){
             IconButton(onClick = { navController.popBackStack()},modifier = Modifier
                     .padding(18.dp)

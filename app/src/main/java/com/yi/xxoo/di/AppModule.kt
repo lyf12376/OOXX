@@ -20,8 +20,11 @@ import com.yi.xxoo.Room.savedUser.SavedUserDatabase
 import com.yi.xxoo.Room.user.UserDao
 import com.yi.xxoo.Room.user.UserDatabase
 import com.yi.xxoo.network.gameHistory.GameHistoryService
+import com.yi.xxoo.network.gameTime.GameTimeService
 import com.yi.xxoo.network.match.MatchService
+import com.yi.xxoo.network.passNumRank.PassNumRankService
 import com.yi.xxoo.network.user.UserService
+import com.yi.xxoo.network.worldBest.WorldBestService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -31,6 +34,7 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
 import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.io.PrintWriter
@@ -89,6 +93,24 @@ object AppModule {
     @Provides
     fun provideUserService(retrofit: Retrofit): UserService {
         return retrofit.create(UserService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideGameTimeService(retrofit: Retrofit):GameTimeService{
+        return retrofit.create(GameTimeService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun providePassNumRankService(retrofit: Retrofit): PassNumRankService {
+        return retrofit.create(PassNumRankService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideWorldBestService(retrofit: Retrofit):WorldBestService{
+        return retrofit.create(WorldBestService::class.java)
     }
 
     @Singleton
