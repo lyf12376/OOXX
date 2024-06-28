@@ -111,6 +111,10 @@ fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltVie
                     }
                 }
                 Divider()
+                history {
+                    navController.navigate("GameHistoryPage")
+                }
+                Divider()
                 logOut {
                     UserData.resetUserData()
                     navController.navigate("LoginPage"){
@@ -282,9 +286,52 @@ fun logOut(unit:()->Unit)
                 .align(Alignment.CenterVertically)
                 .weight(1f)
         )
-
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowRight,
+            contentDescription = "更多",
+            modifier = Modifier
+                .padding(MySize.ItemPadding)
+                .size(MySize.iconSize)
+                .align(Alignment.CenterVertically),
+            tint = Color.Gray
+        )
     }
+}
 
+@Composable
+fun history(unit: () -> Unit)
+{
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .clickable {
+                unit()
+            }
+    ) {
+        Image(
+            painterResource(id = R.drawable.history),
+            contentDescription = "退出登录",
+            modifier = Modifier
+                .padding(MySize.ItemPadding)
+                .size(MySize.iconSize)
+        )
+        Text(
+            text = "历史记录", fontSize = MySize.textSize, modifier = Modifier
+                .padding(MySize.ItemPadding)
+                .align(Alignment.CenterVertically)
+                .weight(1f)
+        )
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowRight,
+            contentDescription = "更多",
+            modifier = Modifier
+                .padding(MySize.ItemPadding)
+                .size(MySize.iconSize)
+                .align(Alignment.CenterVertically),
+            tint = Color.Gray
+        )
+    }
 }
 
 

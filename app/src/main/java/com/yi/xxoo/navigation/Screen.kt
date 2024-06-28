@@ -24,4 +24,8 @@ sealed class Screen(val route:String, val description:String){
     object PreparePage:Screen("PreParePage","准备")
 
     object OnlineGamePage:Screen("OnlineGamePage","联机游戏")
+
+    object SettlePage:Screen("SettlePage","结算")
+
+    object GameHistoryPage:Screen("GameHistoryPage","历史记录")
 }

@@ -20,8 +20,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -76,6 +78,7 @@ import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
 import com.yi.xxoo.Room.game.Game
 import com.yi.xxoo.bean.rankGame.Message
+import com.yi.xxoo.navigation.Screen
 import com.yi.xxoo.utils.GameUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -89,11 +92,11 @@ fun OnlineGamePage(navController: NavController,onlineGameViewModel: OnlineGameP
     val isEnemySubmit = onlineGameViewModel.isEnemySubmit.collectAsState()
     val musicId = R.raw.win
     //提交成功之后显示，是否进入结算页面，如果对方没完成则等待，如果完成则直接显示
-    val showDialog1 = remember {
-        mutableStateOf(false)
-    }
+    val settled = onlineGameViewModel.showSettleDialog.collectAsState()
 
     var time by remember { mutableIntStateOf(0) } // 使用 State 来持有时间
+    val goSettle by onlineGameViewModel.goSettle.collectAsState()
+    val submitFailed = onlineGameViewModel.submitFailed.collectAsState()
 
     // LaunchedEffect 用于启动协程，true作为key，表示这个效果在LaunchedEffect的参数不变时只执行一次
     LaunchedEffect(true) {
@@ -103,11 +106,34 @@ fun OnlineGamePage(navController: NavController,onlineGameViewModel: OnlineGameP
             delay(1000) // 延迟一秒
         }
     }
+
+    LaunchedEffect (goSettle){
+        if (goSettle){
+            navController.navigate("settlePage"){
+                popUpTo("onlineGamePage"){
+                    inclusive = true
+                }
+            }
+        }
+    }
     
     val init = GameUtils.expandStringToNxNList(OnlineGame.init)
     val now = remember { mutableStateOf(init.map { it.toMutableList() }.toMutableList()) }
 
     var showDialog by remember { mutableStateOf(false) }
+
+    if (submitFailed.value){
+        AlertDialog(
+            onDismissRequest = { onlineGameViewModel.reSubmit() },
+            title = { Text("错误") },
+            text = { Text("答案错误，请检查重试") },
+            confirmButton = {
+                Button(onClick = { onlineGameViewModel.reSubmit() }) {
+                    Text("确定")
+                }
+            }
+        )
+    }
 
     if (showDialog){
         AlertDialog(
@@ -119,6 +145,7 @@ fun OnlineGamePage(navController: NavController,onlineGameViewModel: OnlineGameP
                     showDialog = false
                     //退出游戏逻辑
                     onlineGameViewModel.exitGame()
+                    navController.popBackStack()
                 }) {
                     Text("确定")
                 }
@@ -131,23 +158,29 @@ fun OnlineGamePage(navController: NavController,onlineGameViewModel: OnlineGameP
         )
     }
 
-    if (showDialog1.value){
+    if (settled.value){
         AlertDialog(
-            onDismissRequest = { showDialog = false },
+            onDismissRequest = { onlineGameViewModel.closeSettleDialog() },
             title = { Text("结算") },
-            text = { Text("是否进入结算页面") },
+            text = { Text("是否进入结算页面,如果对方未提交则会等待提交再进入") },
             confirmButton = {
                 Button(onClick = {
-                    showDialog = false
-                    //如果对方已完成直接进入，未完成则等待完成之后立马进入
-                    //TODO
-
+                    onlineGameViewModel.closeSettleDialog()
+                    if (isEnemySubmit.value){
+                        navController.navigate("settlePage"){
+                            popUpTo("onlineGamePage"){
+                                inclusive = true
+                            }
+                        }
+                    }else{
+                        onlineGameViewModel.waitSettle()
+                    }
                 }) {
                     Text("确定")
                 }
                 Button(onClick = {
-                    showDialog = false
-
+                    onlineGameViewModel.closeSettleDialog()
+                    navController.popBackStack()
                 }) {
                     Text("退出")
                 }
@@ -157,7 +190,10 @@ fun OnlineGamePage(navController: NavController,onlineGameViewModel: OnlineGameP
 
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+            .navigationBarsPadding()
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Icon(
@@ -211,6 +247,7 @@ fun OnlineGamePage(navController: NavController,onlineGameViewModel: OnlineGameP
             .clickable {
                 onlineGameViewModel.releaseMusic()
                 onlineGameViewModel.cancelAnim()
+                onlineGameViewModel.showSettleDialog()
             }, 
             visible = showSuccessAnim,
             playMusic = {
@@ -221,9 +258,10 @@ fun OnlineGamePage(navController: NavController,onlineGameViewModel: OnlineGameP
 }
 
 @Composable
-fun GameGrid(init:List<List<Char>>, now: MutableState<MutableList<MutableList<Char>>>) {
+fun GameGrid(init:List<List<Char>>, now: MutableState<MutableList<MutableList<Char>>>,onlineGameViewModel: OnlineGamePageViewModel = hiltViewModel()) {
     val gridSize = init.size // 从init确定的网格尺寸
     val recSize = ((ScreenData.screenWidthDp.value - 16) - (gridSize) * 2) / (gridSize + 1) // 每个单元格的尺寸
+    val enabled = onlineGameViewModel.isGridEnabled.collectAsState()
 
     // 从游戏初始化状态计算行和列的计数
     val rowCountX by remember { derivedStateOf { now.value.map { row -> row.count { it == 'X' } }.toIntArray() } }
@@ -325,15 +363,17 @@ fun GameGrid(init:List<List<Char>>, now: MutableState<MutableList<MutableList<Ch
                         .size(recSize.dp)
                         .padding(paddingValues)
                         .clickable {
-                            // 创建now列表的副本并修改
-                            val newNow = now.value
-                                .map { it.toMutableList() }
-                                .toMutableList()
-                            newNow[row - 1][col - 1] =
-                                if (cellValue == 'X') 'O' else if (cellValue == 'O') 'X' else 'X'
+                            if (enabled.value) {
+                                // 创建now列表的副本并修改
+                                val newNow = now.value
+                                    .map { it.toMutableList() }
+                                    .toMutableList()
+                                newNow[row - 1][col - 1] =
+                                    if (cellValue == 'X') 'O' else if (cellValue == 'O') 'X' else 'X'
 
-                            // 更新状态
-                            now.value = newNow
+                                // 更新状态
+                                now.value = newNow
+                            }
                         }
                 ) {
                     if (cellValue == 'X')

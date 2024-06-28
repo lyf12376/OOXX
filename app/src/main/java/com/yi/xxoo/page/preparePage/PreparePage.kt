@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
@@ -85,16 +86,16 @@ fun PreparePage(navController: NavController,prepareViewModel: PrepareViewModel 
     }
     AnimatedVisibility(visible = isFirstFlagShow.value) {
         AnimatedComponentLeft {
-            UserContent(UserData.name)
+            UserContent(UserData.name,UserData.userRank,UserData.photo)
         }
     }
     AnimatedVisibility(visible = isNextFlagShow.value) {
         AnimatedComponentRight {
-            UserContent(OnlineGame.enemyName)
+            UserContent(OnlineGame.enemyName,OnlineGame.enemyRank,OnlineGame.enemyPhoto)
         }
     }
     AnimatedVisibility(visible = isLoading.value) {
-        Box(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().navigationBarsPadding()) {
             WaveLoading(
                 modifier = Modifier
                     .size(200.dp)
@@ -127,7 +128,7 @@ fun AnimatedComponentLeft(flag: @Composable () -> Unit) {
         animate.value = false // 触发动画
     }
 
-    val scale = animateFloatAsState(targetValue = if (animate.value) 1f else 0.40f, label = "")
+    val scale = animateFloatAsState(targetValue = if (animate.value) 1f else 0.4f, label = "")
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp

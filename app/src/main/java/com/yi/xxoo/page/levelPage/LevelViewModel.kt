@@ -1,5 +1,6 @@
 package com.yi.xxoo.page.levelPage
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.yi.xxoo.Const.GameMode
@@ -21,10 +22,23 @@ class LevelViewModel @Inject constructor(private val userDao: UserDao, private v
     private val _coin = MutableStateFlow(0)
     val coin: StateFlow<Int> = _coin
 
+    val errorList = listOf("金币不足，无法解锁游戏","未解锁关卡，无法进行游戏")
+    private val _errorStatus = MutableStateFlow(0)
+    val errorStatus:StateFlow<Int> = _errorStatus
+
     init {
         // 初始化ViewModel时开始监听硬币数量的变化
         observeUserCoins()
         observeUserPassNum()
+    }
+
+    fun setError2()
+    {
+        _errorStatus.value = 2
+    }
+
+    fun knowErr(){
+        _errorStatus.value = 0
     }
 
     private fun observeUserCoins() {
@@ -50,21 +64,25 @@ class LevelViewModel @Inject constructor(private val userDao: UserDao, private v
 
     // 通过Dao更新用户硬币数量
     fun unLockGame(coin: Int) {
-        viewModelScope.launch {
-            userDao.updateUserCoin(UserData.account, coin)
-            UserData.coin = coin
-            userDao.updateUserPassNum(UserData.passNum+1,UserData.account)
-            UserData.passNum += 1
-            if (GameMode.isNetworkEnabled) {
-                try {
+        if (UserData.coin >= 20) {
+            viewModelScope.launch {
+                userDao.updateUserCoin(UserData.account, coin)
+                UserData.coin = coin
+                userDao.updateUserPassNum(UserData.passNum + 1, UserData.account)
+                UserData.passNum += 1
+                if (GameMode.isNetworkEnabled) {
                     withContext(Dispatchers.IO) {
-                        userService.updateUserCoin(UserData.account, coin)
-                        userService.updateUserPassNum(UserData.account, UserData.passNum)
+                        try {
+                            userService.updateUserCoin(UserData.account, coin)
+                            userService.updateUserPassNum(UserData.account, UserData.passNum)
+                        } catch (e: Exception) {
+                            Log.d("TAG", "unLockGame: ${e.message}")
+                        }
                     }
-                }catch (e:Exception){
-                    e.printStackTrace()
                 }
             }
+        }else{
+            _errorStatus.value = 1
         }
     }
 

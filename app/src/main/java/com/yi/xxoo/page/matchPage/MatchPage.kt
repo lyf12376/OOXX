@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -50,10 +51,12 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.github.compose.waveloading.DrawType
 import com.github.compose.waveloading.WaveLoading
 import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
+import com.yi.xxoo.utils.GifImage
 import com.yi.xxoo.utils.RippleButton
 import com.yi.xxoo.utils.RippleButton.clearRipples
 import com.yi.xxoo.utils.RippleButton.emitPress
@@ -97,6 +100,7 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
 
     LaunchedEffect(isUserAccept.value) {
         if (isUserAccept.value) {
+            matchViewModel.stopTimer()
             Log.d("TAG", "MatchPage: 1324564654564564156")
             animationJob = scope.launch {
                 progress.snapTo(1f)
@@ -156,7 +160,7 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
                     .fillMaxWidth()
                     .height(600.dp), contentAlignment = Alignment.Center
             ) {
-                UserContent(UserData.name)
+                UserContent(UserData.name,UserData.userRank,UserData.photo)
             }
             Spacer(modifier = Modifier.height(36.dp))
 
@@ -217,6 +221,12 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
                     }
 
                 }
+
+                Button(onClick = { matchViewModel.rejectMatch() }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
+                    Text(text = "拒绝匹配",fontSize = 36.sp,modifier = Modifier
+                        .padding(8.dp)
+                        .align(Alignment.CenterVertically))
+                }
             }
 
         }
@@ -226,7 +236,7 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
 }
 
 @Composable
-fun UserContent(name:String) {
+fun UserContent(name:String,rank:Int,photo:String) {
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         // 使用maxWidth和maxHeight获取外部Box的尺寸
         val maxWidth = maxWidth
@@ -238,12 +248,15 @@ fun UserContent(name:String) {
                 .fillMaxSize(), // 它现在会填满外层 BoxWithConstraints
             contentAlignment = Alignment.Center
         ) {
-            Image(
-                painterResource(id = R.drawable.bronze),
-                contentDescription = "青铜边框",
-                // 根据外层Box大小动态调整尺寸
-                modifier = Modifier.size(maxWidth, maxHeight) // 根据外部尺寸的一定比例来决定
-            )
+            if (rank == 0 || rank == 1) {
+                Image(
+                    painterResource(id = if (rank == 0) R.drawable.bronze else R.drawable.silver),
+                    contentDescription = "边框",
+                    // 根据外层Box大小动态调整尺寸
+                    modifier = Modifier.size(maxWidth, maxHeight) // 根据外部尺寸的一定比例来决定
+                )
+            }else
+                GifImage(modifier = Modifier.size(maxWidth, maxHeight),imageId = R.drawable.gold)
         }
 
         Column(
@@ -252,14 +265,10 @@ fun UserContent(name:String) {
                 .height(maxHeight), // 可以根据maxHeight调整高度
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Image(
-                painterResource(id = R.drawable.rank),
-                contentDescription = "头像",
-                modifier = Modifier
-                    .padding(top = maxHeight * 0.2f)
-                    .size(maxHeight * 0.3f)
-                    .align(Alignment.CenterHorizontally)
-            )
+            AsyncImage(model = photo, contentDescription = "头像",modifier = Modifier
+                .padding(top = maxHeight * 0.2f)
+                .size(maxHeight * 0.3f)
+                .align(Alignment.CenterHorizontally))
             Spacer(modifier = Modifier.height(maxHeight * 0.15f))
             Text(
                 text = name, fontSize = 48.sp, modifier = Modifier

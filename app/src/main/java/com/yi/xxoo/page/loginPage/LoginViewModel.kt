@@ -44,7 +44,7 @@ class LoginViewModel @Inject constructor(private val savedUserDao: SavedUserDao,
     val registerOfflineAccount:StateFlow<Boolean> = _registerOfflineAccount
 
 
-    fun setNetWork()
+    private fun setNetWork()
     {
         _network.value = true
     }
@@ -73,27 +73,27 @@ class LoginViewModel @Inject constructor(private val savedUserDao: SavedUserDao,
 
 
     fun isLogin(account: String, password: String) {
-        try {
-            viewModelScope.launch{
-                withContext(Dispatchers.IO){
-                    val loginResponse = userService.login(account,password)
-                    if (loginResponse.code == 200)
-                    {
-                        _loginSuccess.value = true
-                        UserData.setUser(loginResponse.data!!)
-                        if (userDao.isExist(loginResponse.data.account) == null)
-                            userDao.createUser(loginResponse.data)
-                        else
-                            userDao.updateUser(loginResponse.data)
-                    }
-                    else{
-                        _loginFailed.value = true
+
+            viewModelScope.launch {
+                withContext(Dispatchers.IO) {
+                    try {
+                        val loginResponse = userService.login(account, password)
+                        if (loginResponse.code == 200) {
+                            _loginSuccess.value = true
+                            UserData.setUser(loginResponse.data!!)
+                            if (userDao.isExist(loginResponse.data.account) == null)
+                                userDao.createUser(loginResponse.data)
+                            else
+                                userDao.updateUser(loginResponse.data)
+                        } else {
+                            _loginFailed.value = true
+                        }
+                    } catch (e: Exception) {
+                        Log.d("TAG", "isLogin: ${e.message}")
                     }
                 }
             }
-        }catch (e:Exception){
-            Log.d("TAG", "isLogin: ${e.message}")
-        }
+
     }
 
     fun saveUser(savedUser: SavedUser) {

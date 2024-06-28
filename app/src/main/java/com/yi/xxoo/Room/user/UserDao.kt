@@ -37,8 +37,11 @@ interface UserDao {
     @Query("UPDATE UserData SET achievement = :achievement WHERE email = :email")
     suspend fun updateUserAchievement(email: String, achievement: String)
 
-    @Query("UPDATE UserData SET rank = :rank WHERE email = :email")
-    suspend fun updateUserLevel(email: String, rank: Int)
+    @Query("UPDATE UserData SET userRank = :rank WHERE email = :email")
+    suspend fun updateUserRank(email: String, rank: Int)
+
+    @Query("UPDATE UserData SET userRankWin = :rankWin WHERE email = :email")
+    suspend fun updateUserRankWin(email: String, rankWin: Int)
 
     @Query("UPDATE UserData SET gameTimes = :gameTimes WHERE email = :email")
     suspend fun updateUserGameTimes(email: String, gameTimes: Int)

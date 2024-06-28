@@ -20,23 +20,5 @@ class MineViewModel @Inject constructor(
     private val userService: UserService
 ) : ViewModel() {
 
-    suspend fun getUserData() {
-        UserData.setUser(userDao.getUserByEmail("account"))
-    }
-
-    suspend fun creatGame() {
-        gameDao.createGame(
-            Game(
-                difficulty = 3,
-                init = "XOXOXOOXXOXOXOO  XXOOXX  XXOOXOXOXOX",
-                target = "XOXOXOOXXOXOXOOXOXXOOXXOOXXOOXOXOXOX"
-            )
-        )
-    }
-
-    suspend fun getUserHistory(): GameHistoryResponse {
-        return historyService.getGameHistory(UserData.account)
-    }
-
 
 }

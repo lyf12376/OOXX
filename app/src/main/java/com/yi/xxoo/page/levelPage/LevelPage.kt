@@ -61,16 +61,19 @@ import com.yi.xxoo.page.matchPage.MatchPage
 import com.yi.xxoo.utils.GameUtils
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LevelPage(navController: NavController) {
     Column (modifier = Modifier.fillMaxSize()){
-        LevelSelectionScreen(
-            navController,
-            scroll = {
-                navController.navigate(Screen.MatchPage.route)
-            }
-        )
+        if (GameMode.isNetworkEnabled) {
+            LevelSelectionScreen(
+                navController,
+                scroll = {
+                    navController.navigate(Screen.MatchPage.route)
+                }
+            )
+        }else{
+            OfflineLevelSelectionScreen(navController = navController)
+        }
     }
 }
 
@@ -90,6 +93,22 @@ fun LevelSelectionScreen(navController: NavController,scroll:()->Unit,levelViewM
     val passNum = levelViewModel.passNum.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
+    val error = levelViewModel.errorStatus.collectAsState()
+
+    if (error.value == 1 || error.value == 2){
+        AlertDialog(
+            onDismissRequest = { levelViewModel.knowErr() },
+            title = { Text("错误") },
+            text = { Text(levelViewModel.errorList[error.value-1]) },
+            confirmButton = {
+                Button(onClick = {
+                    levelViewModel.knowErr()
+                }) {
+                    Text("确定")
+                }
+            }
+        )
+    }
 
     if (showDialog)
         AlertDialog(
@@ -126,7 +145,6 @@ fun LevelSelectionScreen(navController: NavController,scroll:()->Unit,levelViewM
                 .padding(16.dp),
             contentAlignment = Alignment.TopEnd
         ) {
-
             Row {
                 Button(onClick = { scroll() }, modifier = Modifier.align(Alignment.CenterVertically)) {
                     Text(
@@ -150,10 +168,6 @@ fun LevelSelectionScreen(navController: NavController,scroll:()->Unit,levelViewM
                         .align(Alignment.CenterVertically)
                 )
             }
-
-
-
-
         }
 
         Text(text = "第${pagerState.currentPage+1}关", fontSize = 48.sp, fontWeight = FontWeight.Bold)
@@ -247,7 +261,15 @@ fun LevelSelectionScreen(navController: NavController,scroll:()->Unit,levelViewM
             modifier = Modifier
                 .size(80.dp)
                 .clickable {
-                    navController.navigate("OfflineGamePage/${pagerState.currentPage + 1}")
+                    if (pagerState.currentPage <= passNum.value) {
+                        Log.d(
+                            "TAG",
+                            "OfflineLevelSelectionScreen: ${pagerState.currentPage} ${passNum.value}"
+                        )
+                        navController.navigate("OfflineGamePage/${pagerState.currentPage + 1}")
+                    } else {
+                        levelViewModel.setError2()
+                    }
                 })
 
         // Record at the bottom
@@ -284,6 +306,22 @@ fun OfflineLevelSelectionScreen(navController: NavController,levelViewModel: Lev
     val passNum = levelViewModel.passNum.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var showDialog by remember { mutableStateOf(false) }
+    val error = levelViewModel.errorStatus.collectAsState()
+
+    if (error.value == 1 || error.value == 2){
+        AlertDialog(
+            onDismissRequest = { levelViewModel.knowErr() },
+            title = { Text("错误") },
+            text = { Text(levelViewModel.errorList[error.value-1]) },
+            confirmButton = {
+                Button(onClick = {
+                    levelViewModel.knowErr()
+                }) {
+                    Text("确定")
+                }
+            }
+        )
+    }
 
     if (showDialog)
         AlertDialog(
@@ -308,7 +346,9 @@ fun OfflineLevelSelectionScreen(navController: NavController,levelViewModel: Lev
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .statusBarsPadding()
+            .navigationBarsPadding(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -382,7 +422,6 @@ fun OfflineLevelSelectionScreen(navController: NavController,levelViewModel: Lev
                                 Alignment.CenterHorizontally
                             ))
                         }
-
                     }
                 else
                     Box(
@@ -397,9 +436,7 @@ fun OfflineLevelSelectionScreen(navController: NavController,levelViewModel: Lev
                                 Alignment.CenterHorizontally
                             ))
                         }
-
                     }
-
             }
 
             Icon(
@@ -423,7 +460,16 @@ fun OfflineLevelSelectionScreen(navController: NavController,levelViewModel: Lev
             modifier = Modifier
                 .size(80.dp)
                 .clickable {
-                    navController.navigate("OfflineGamePage/${pagerState.currentPage + 1}")
+                    Log.d("TAG", "OfflineLevelSelectionScreen: sdasddsadasdasdsadasdasdasdsadsadasds${pagerState.currentPage}")
+                    if (pagerState.currentPage <= passNum.value) {
+                        Log.d(
+                            "TAG",
+                            "OfflineLevelSelectionScreen: ${pagerState.currentPage} ${passNum.value}"
+                        )
+                        navController.navigate("OfflineGamePage/${pagerState.currentPage + 1}")
+                    } else {
+                        levelViewModel.setError2()
+                    }
                 })
 
         // Record at the bottom

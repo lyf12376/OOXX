@@ -5,10 +5,10 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "PassNumRank",
-    primaryKeys = ["rank"]
+    primaryKeys = ["id"]
 )
 data class PassNumRank(
-    val rank : Int,
+    val id : Int,
     val userAccount:String,
     val userName : String,
     val passNum : Int

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
@@ -25,6 +26,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,9 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.yi.xxoo.R
 import kotlinx.coroutines.launch
@@ -54,7 +56,9 @@ fun RankPage(navController: NavController) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val coroutineScope = rememberCoroutineScope()
 
-    Column(modifier = Modifier.fillMaxSize().navigationBarsPadding()) {
+    Column(modifier = Modifier
+        .fillMaxSize()
+        .navigationBarsPadding()) {
         Box {
             Box {
                 Image(
@@ -68,10 +72,11 @@ fun RankPage(navController: NavController) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .background(Color.Transparent)
+                        .statusBarsPadding()
                 ) {
                     IconButton(
                         onClick = { navController.popBackStack() }, modifier = Modifier
-                            .padding(18.dp)
+                            .padding(9.dp)
                             .size(36.dp)
                     ) {
                         Icon(
@@ -83,7 +88,7 @@ fun RankPage(navController: NavController) {
                     }
                     Text(
                         text = "数据统计", modifier = Modifier
-                            .padding(18.dp)
+                            .padding(9.dp)
                             .align(Alignment.CenterVertically), fontSize = 24.sp
                     )
                 }
@@ -116,8 +121,8 @@ fun RankPage(navController: NavController) {
             userScrollEnabled = false
         ) { page ->
             when (page) {
-                0 -> RankingList(pageTitle = "Leaderboard 1")
-                1 -> RankingList(pageTitle = "Leaderboard 2")
+                0 -> passNumRankingList(pageTitle = "通关数")
+                1 -> gameTimeRankingList(pageTitle = "游戏时间")
             }
         }
 
@@ -129,19 +134,29 @@ fun RankPage(navController: NavController) {
 }
 
 @Composable
-@Preview
-fun RankingList(pageTitle: String = "ddsa") {
+fun passNumRankingList(pageTitle: String = "", rankViewModel: RankViewModel = hiltViewModel()) {
+    val passNumList = rankViewModel.passNumRankList.collectAsState()
     LazyColumn {
-        items(10) { index ->
-            ListItem(index, avatar = R.drawable.rank, name = "傻逼")
+        items(passNumList.value.size) { index ->
+            ListItem(index,name = passNumList.value[index].userName,passNum = passNumList.value[index].passNum, whichRank = 1)
             Divider()
         }
-
     }
 }
 
 @Composable
-fun ListItem(rank: Int, avatar: Int, name: String) {
+fun gameTimeRankingList(pageTitle: String = "", rankViewModel: RankViewModel = hiltViewModel()) {
+    val gameTimeList = rankViewModel.gameTimeRankList.collectAsState()
+    LazyColumn {
+        items(gameTimeList.value.size) { index ->
+            ListItem(index,name = gameTimeList.value[index].userName,gameTime = gameTimeList.value[index].gameTime, whichRank = 2)
+            Divider()
+        }
+    }
+}
+
+@Composable
+fun ListItem(rank: Int,name: String,passNum: Int = 0,gameTime: Int = 0,whichRank: Int) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -153,11 +168,6 @@ fun ListItem(rank: Int, avatar: Int, name: String) {
                 .padding(end = 18.dp)
                 .width(32.dp)
         )
-        Image(
-            painterResource(id = avatar),
-            contentDescription = "头像",
-            modifier = Modifier.size(48.dp)
-        )
         Text(
             text = name, fontSize = 24.sp, modifier = Modifier
                 .align(Alignment.CenterVertically)
@@ -165,7 +175,7 @@ fun ListItem(rank: Int, avatar: Int, name: String) {
                 .weight(1f)
         )
         Text(
-            text = "时间", fontSize = 24.sp, modifier = Modifier
+            text = if (whichRank == 1) "$passNum" else "$gameTime", fontSize = 24.sp, modifier = Modifier
                 .align(Alignment.CenterVertically)
                 .padding(end = 32.dp)
         )

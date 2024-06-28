@@ -13,7 +13,7 @@ interface PassNumRankDao {
     @Query("SELECT * FROM passNumRank")
     fun getPassNumRank(): Flow<List<PassNumRank>>
 
-    @Query("update passNumRank set userName = :userName, passNum = :passNum where rank = :rank")
+    @Query("update passNumRank set userName = :userName, passNum = :passNum where id = :rank")
     suspend fun updatePassNumRankByRank(rank: Int, userName: String, passNum: String)
 
 }

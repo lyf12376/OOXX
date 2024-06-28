@@ -36,7 +36,7 @@ class MatchViewModel @Inject constructor(
     init {
         Log.d("TAG", ": creat")
     }
-    suspend fun creatUser(){
+    suspend fun createUser(){
         userDao.createUser(User("name","account","password","account",photo = "",bestRecord = "123,45"))
     }
 
@@ -64,6 +64,11 @@ class MatchViewModel @Inject constructor(
         }
     }
 
+    fun stopTimer(){
+        _isRunning.value = false
+        timerJob.cancel()
+    }
+
     fun resetTimer() {
         _isRunning.value = false
         timerJob.cancel()
@@ -78,13 +83,12 @@ class MatchViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 try {
                     // 在IO线程执行网络请求
-                    matchService.matching(RankGameRequest(UserData.account, UserData.name,0)).collect {
+                    matchService.matching(RankGameRequest(UserData.account, UserData.name,UserData.photo,UserData.userRank)).collect {
                         _message.value = it
                     }
                 }catch (e:Exception){
                     Log.d("TAG", "matching: ${e.message}")
                 }
-
             }
         }
     }
@@ -94,7 +98,7 @@ class MatchViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 try {
                     // 在IO线程执行网络请求
-                    matchService.cancel(RankGameRequest(UserData.account, UserData.name,0))
+                    matchService.cancel(RankGameRequest(UserData.account, UserData.name,UserData.photo,UserData.userRank))
                 }catch (e:Exception){
                     Log.d("TAG", "matching: ${e.message}")
                 }
@@ -110,7 +114,7 @@ class MatchViewModel @Inject constructor(
     private val _startGame = MutableStateFlow(false)
     val startGame: StateFlow<Boolean> = _startGame
 
-    //用户接受
+    //用户接受，接之后变为false，用来显示动画
     private val _accept = MutableStateFlow(false)
     val accept :StateFlow<Boolean> = _accept
 
@@ -187,6 +191,7 @@ class MatchViewModel @Inject constructor(
             if (i.userAccount != UserData.account) {
                 OnlineGame.enemyName = i.userName
                 OnlineGame.enemyRank = i.rank
+                OnlineGame.enemyPhoto = i.userPhoto
             }
         }
     }

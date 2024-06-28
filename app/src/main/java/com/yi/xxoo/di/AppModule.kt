@@ -22,6 +22,7 @@ import com.yi.xxoo.Room.user.UserDatabase
 import com.yi.xxoo.network.gameHistory.GameHistoryService
 import com.yi.xxoo.network.gameTime.GameTimeService
 import com.yi.xxoo.network.match.MatchService
+import com.yi.xxoo.network.onlineGameHistory.OnlineGameHistoryService
 import com.yi.xxoo.network.passNumRank.PassNumRankService
 import com.yi.xxoo.network.user.UserService
 import com.yi.xxoo.network.worldBest.WorldBestService
@@ -111,6 +112,12 @@ object AppModule {
     @Provides
     fun provideWorldBestService(retrofit: Retrofit):WorldBestService{
         return retrofit.create(WorldBestService::class.java)
+    }
+
+    @Singleton
+    @Provides
+    fun provideOnlineGameService(retrofit: Retrofit): OnlineGameHistoryService {
+        return retrofit.create(OnlineGameHistoryService::class.java)
     }
 
     @Singleton

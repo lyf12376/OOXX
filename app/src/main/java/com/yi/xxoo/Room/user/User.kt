@@ -20,8 +20,8 @@ data class User(
     //成就   存储例如"000","111"  0代表未完成，1代表完成
     val achievement : String = "000",
     //排位等级（maybe）
-    val rank : Int = 0,
-    val rankWin :Int = 0,
+    val userRank : Int = 0,
+    val userRankWin :Int = 0,
     //完成游戏次数
     val gameTimes : Int = 0,
     //游戏时间

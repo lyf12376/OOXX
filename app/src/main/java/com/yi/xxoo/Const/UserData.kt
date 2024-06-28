@@ -11,8 +11,8 @@ object UserData {
     var email : String = ""
     var photo : String = ""
     var achievement : String = "000"
-    var rank : Int = 0
-    var rankWin:Int = 0
+    var userRank : Int = 0
+    var userRankWin:Int = 0
     var gameTimes : Int = 0
     var time : Int = 0
     var bestRecord: ArrayList<Int> = arrayListOf()
@@ -26,8 +26,8 @@ object UserData {
         coin = userData.coin
         photo = userData.photo
         achievement = userData.achievement
-        rank = userData.rank
-        rankWin = userData.rankWin
+        userRank = userData.userRank
+        userRankWin = userData.userRankWin
         gameTimes = userData.gameTimes
         time = userData.time
         bestRecord = userData.bestRecord.stringToPersonalBestRecord()
@@ -43,8 +43,8 @@ object UserData {
         email = ""
         photo = ""
         achievement = "000"
-        rank = 0
-        rankWin = 0
+        userRank = 0
+        userRankWin = 0
         gameTimes = 0
         time = 0
         bestRecord = arrayListOf()

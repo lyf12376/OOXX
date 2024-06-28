@@ -19,5 +19,8 @@ interface GameDao {
     @Query("select init from Game")
     fun getGameInit(): Flow<List<String>>
 
+    @Query("select count(*) from Game")
+    suspend fun getGamesSize():Int
+
 
 }

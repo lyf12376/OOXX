@@ -8,6 +8,7 @@ object OnlineGame {
     var target = ""
     var enemyName = ""
     var enemyRank = 0
+    var enemyPhoto = ""
     var enemyTime = 0
     var enemySubmissions = 0
 
