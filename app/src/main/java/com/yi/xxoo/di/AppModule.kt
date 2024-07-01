@@ -40,9 +40,7 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    private const val LocalUrl = "http://106.52.31.86:80"
-//    private const val LocalUrl = "http://10.33.107.244:8080"
-//    private const val LocalUrl = "http://10.70.143.129:8080"
+    private const val LocalUrl = "you url"
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
