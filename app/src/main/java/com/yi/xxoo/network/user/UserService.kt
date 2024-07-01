@@ -33,7 +33,7 @@ interface UserService {
     suspend fun updateName(@Query("userAccount") account:String,@Query("name") name:String):CommonResponse
 
     @GET("user/updatePassword")
-    suspend fun updatePassword(@Query("userAccount") account:String,@Query("password") password:String):CommonResponse
+    suspend fun updatePassword(@Query("userAccount") account:String,@Query("password") password:String,@Query("verificationCode") verificationCode:String):CommonResponse
 
     @GET("user/updateCoin")
     suspend fun updateUserCoin(@Query("userAccount") account:String,@Query("coin") coin:Int):CommonResponse

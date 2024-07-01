@@ -13,6 +13,6 @@ interface GameTimeService {
     fun getGameTimeRank(): Flow<GameTimeResponse>
 
     @POST("game/gameTimeRank/update")
-    fun updateGameTimeRank(@Body gameTimeRank: GameTimeRank): CommonResponse
+    suspend fun updateGameTimeRank(@Body gameTimeRank: GameTimeRank): CommonResponse
 
 }

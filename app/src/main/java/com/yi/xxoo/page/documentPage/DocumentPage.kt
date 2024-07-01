@@ -69,6 +69,8 @@ import com.yi.xxoo.R
 import com.yi.xxoo.utils.pictrueUtils.PhotoComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.BufferedReader
 import java.io.File
 import java.io.FileOutputStream
@@ -104,6 +106,7 @@ fun DocumentPage(navController: NavController, documentViewModel: DocumentViewMo
     val croppedBitmap = remember { mutableStateOf<ImageBitmap?>(null) }
     var file:File? = null
     val editSuccess = documentViewModel.editSuccess.collectAsState()
+    val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect (croppedBitmap){
         isCropped.value = true
@@ -210,9 +213,12 @@ fun DocumentPage(navController: NavController, documentViewModel: DocumentViewMo
                         Log.d("TAG", "DocumentPage: ${e.message}")
                     }
 
-
-                    FileOutputStream(file).use { out ->
-                        androidBitmap.compress(Bitmap.CompressFormat.PNG, 100, out) // png格式质量参数被忽略
+                    coroutineScope.launch {
+                        withContext(Dispatchers.IO){
+                            FileOutputStream(file).use { out ->
+                                androidBitmap.compress(Bitmap.CompressFormat.PNG, 100, out) // png格式质量参数被忽略
+                            }
+                        }
                     }
                     Image(
                         it,

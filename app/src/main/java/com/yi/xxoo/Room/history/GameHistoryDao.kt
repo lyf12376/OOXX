@@ -3,6 +3,7 @@ package com.yi.xxoo.Room.history
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface GameHistoryDao {
@@ -10,5 +11,5 @@ interface GameHistoryDao {
     suspend fun insertGameHistory(gameHistory: GameHistory)
 
     @Query("SELECT * FROM GameHistory WHERE userAccount = :userAccount")
-    suspend fun getGameHistory(userAccount:String): List<GameHistory>
+    fun getGameHistory(userAccount:String): Flow<List<GameHistory>>
 }

@@ -5,10 +5,10 @@ import androidx.room.PrimaryKey
 
 @Entity(
     tableName = "GameTimeRank",
-    primaryKeys = ["id"]
 )
 data class GameTimeRank(
-    val id : Int,
+    @PrimaryKey(true)
+    val id : Long,
     val userAccount:String,
     val userName : String,
     val gameTime : Int

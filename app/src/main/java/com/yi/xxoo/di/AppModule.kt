@@ -1,10 +1,8 @@
 package com.yi.xxoo.di
 
 import android.content.Context
-import android.util.Log
 import com.coder.vincent.sharp_retrofit.call_adapter.flow.FlowCallAdapterFactory
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
-import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.Room.game.GameDao
 import com.yi.xxoo.Room.game.GameDatabase
 import com.yi.xxoo.Room.history.GameHistoryDao
@@ -35,11 +33,6 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.create
-import java.io.BufferedReader
-import java.io.InputStreamReader
-import java.io.PrintWriter
-import java.net.Socket
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
@@ -47,7 +40,9 @@ import javax.inject.Singleton
 @InstallIn(SingletonComponent::class)
 object AppModule {
 
-    private val localUrl = "http://10.70.143.129:8080"
+    private const val LocalUrl = "http://106.52.31.86:80"
+//    private const val LocalUrl = "http://10.33.107.244:8080"
+//    private const val LocalUrl = "http://10.70.143.129:8080"
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
     }
@@ -70,7 +65,7 @@ object AppModule {
     @Provides
     fun provideRetrofit(client: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(localUrl)
+            .baseUrl(LocalUrl)
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .addCallAdapterFactory(CoroutineCallAdapterFactory())

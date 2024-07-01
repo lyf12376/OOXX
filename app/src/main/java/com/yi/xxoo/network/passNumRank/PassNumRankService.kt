@@ -12,5 +12,5 @@ interface PassNumRankService {
     fun getPassNumRank(): Flow<PassNumRankResponse>
 
     @POST("game/passRank/update")
-    fun updatePassNumRank(@Body passNumRank: PassNumRank): CommonResponse
+    suspend fun updatePassNumRank(@Body passNumRank: PassNumRank): CommonResponse
 }

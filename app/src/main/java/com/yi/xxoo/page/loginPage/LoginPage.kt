@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -49,6 +50,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
@@ -280,7 +284,7 @@ fun LoginPage(
             BasicTextField(
                 value = password,
                 onValueChange = { password = it },
-                modifier = androidx.compose.ui.Modifier
+                modifier = Modifier
                     .width(textWidth)
                     .height(textHeight)
                     .background(Color.Transparent)
@@ -294,6 +298,8 @@ fun LoginPage(
                     },
                 textStyle = TextStyle(Color.White, fontSize = 18.sp),
                 singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password), // 确保键盘为密码类型
                 decorationBox = { innerTextField ->
                     Row {
                         Icon(
@@ -373,7 +379,9 @@ fun LoginPage(
             text = "Forget Password",
             modifier = Modifier
                 .align(Alignment.End)
-                .clickable { }
+                .clickable {
+                    navController.navigate(Screen.ForgetPage.route)
+                }
                 .padding(end = 54.dp),
             fontSize = 12.sp,
             fontFamily = FontFamily(Font(R.font.cute)),
@@ -385,7 +393,7 @@ fun LoginPage(
                 text = "Don't have a account?Create One!",
                 modifier = Modifier.clickable {
                     navController.navigate(Screen.RegisterPage.route)
-                },
+                }.padding(bottom = 8.dp),
                 fontSize = 16.sp,
                 fontFamily = FontFamily(Font(R.font.cute)),
                 color = Color("#b9b9b9".toColorInt())

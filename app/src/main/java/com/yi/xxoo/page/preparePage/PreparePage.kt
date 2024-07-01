@@ -51,9 +51,7 @@ fun PreparePage(navController: NavController,prepareViewModel: PrepareViewModel 
         if (isLoading.value){
             delay(5000)
             navController.navigate("OnlineGamePage"){
-                popUpTo("PreparePage"){
-                    inclusive = true
-                }
+                popUpTo("MatchPage")
             }
         }
     }

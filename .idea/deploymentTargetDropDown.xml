@@ -5,14 +5,11 @@
       <entry key="AnimatedComponent">
         <State />
       </entry>
-      <entry key="MatchPage">
-        <State />
-      </entry>
       <entry key="OOXX.xxoo.app">
         <State>
-          <runningDeviceTargetSelectedWithDropDown>
+          <targetSelectedWithDropDown>
             <Target>
-              <type value="RUNNING_DEVICE_TARGET" />
+              <type value="QUICK_BOOT_TARGET" />
               <deviceKey>
                 <Key>
                   <type value="VIRTUAL_DEVICE_PATH" />
@@ -20,14 +17,17 @@
                 </Key>
               </deviceKey>
             </Target>
-          </runningDeviceTargetSelectedWithDropDown>
-          <timeTargetWasSelectedWithDropDown value="2024-06-28T09:08:42.036197200Z" />
+          </targetSelectedWithDropDown>
+          <timeTargetWasSelectedWithDropDown value="2024-06-30T13:39:06.598196300Z" />
         </State>
       </entry>
       <entry key="PreparePage">
         <State />
       </entry>
       <entry key="PreviewChatScreen">
+        <State />
+      </entry>
+      <entry key="RulePage">
         <State />
       </entry>
       <entry key="app">

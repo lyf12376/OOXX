@@ -9,6 +9,7 @@ import com.yi.xxoo.Const.OnlineGame
 import com.yi.xxoo.Const.Settlement
 import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.Room.game.Game
+import com.yi.xxoo.Room.rank.time.GameTimeRank
 import com.yi.xxoo.bean.rankGame.Message
 import com.yi.xxoo.bean.rankGame.PlayerSettlement
 import com.yi.xxoo.bean.rankGame.SubmissionRecord
@@ -110,6 +111,7 @@ class OnlineGamePageViewModel @Inject constructor(
                                 submitRecord
                             )
                         )
+                        gameTimeService.updateGameTimeRank(GameTimeRank(1,UserData.account,UserData.name,UserData.time))
                         UserData.time += time
                         UserData.gameTimes++
                         userService.updateTime(UserData.account, UserData.time)
@@ -137,6 +139,7 @@ class OnlineGamePageViewModel @Inject constructor(
     {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
+                SocketModule.disConnectSocket()
                 matchService.submit(PlayerSettlement(OnlineGame.gameId,RankGame(UserData.account,UserData.name),0,0,submitRecord))
             }
         }

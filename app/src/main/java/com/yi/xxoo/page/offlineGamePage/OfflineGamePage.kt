@@ -72,6 +72,7 @@ fun OfflineGamePage(navController: NavController, level:Int, offlineGameViewMode
     LaunchedEffect(level) {
         offlineGameViewModel.getGame(level)
         offlineGameViewModel.loadMusic(context, R.raw.win)
+        offlineGameViewModel.getWorldBest(level)
     }
     offlineGameViewModel.target = gameDetail?.target ?: ""
 
@@ -237,7 +238,6 @@ fun GameGrid(game: Game?,now: MutableState<MutableList<MutableList<Char>>>) {
             }
     ) {
         items((gridSize + 1) * (gridSize + 1)) { index ->
-            Log.d("TAG", "GameGrid: $index")
             val row = index / (gridSize + 1)
             val col = index % (gridSize + 1)
 
@@ -358,7 +358,7 @@ fun Record(level: Int,offlineGameViewModel: OfflineGameViewModel = hiltViewModel
                 .weight(1f)
         ) {
             Text(
-                text = if(GameMode.isNetworkEnabled) "WB: ${worldBest.value}" else "WB: 请联机查看",
+                text = if(GameMode.isNetworkEnabled) "WB: ${if (worldBest.value != "") worldBest.value else "暂无记录"}" else "WB: 请联机查看",
                 fontSize = 20.sp,
                 modifier = Modifier
                     .padding(16.dp)

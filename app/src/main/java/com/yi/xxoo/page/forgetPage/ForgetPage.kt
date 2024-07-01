@@ -1,5 +1,6 @@
-package com.yi.xxoo.page.registerPage
+package com.yi.xxoo.page.forgetPage
 
+import com.yi.xxoo.page.registerPage.RegisterViewModel
 import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -20,7 +21,6 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -49,15 +49,15 @@ import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.yi.xxoo.R
+import com.yi.xxoo.navigation.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.security.SecureRandom
 
 @Composable
-fun RegisterPage(navController: NavController, registerViewModel: RegisterViewModel = hiltViewModel()) {
+fun ForgetPage(navController: NavController, forgetViewModel: ForgetViewModel = hiltViewModel()) {
     val sendMail = CoroutineScope(Dispatchers.IO)
     var showDialog by remember {
         mutableStateOf(false)
@@ -76,11 +76,9 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
     var remainingSeconds by remember {
         mutableIntStateOf(30)
     }
-    val sendSuccess = registerViewModel.sendSuccess.collectAsState()
-    val sendFailed = registerViewModel.sendFailed.collectAsState()
-    val registerSuccess = registerViewModel.registerSuccess.collectAsState()
-    val registerFailed = registerViewModel.registerFailed.collectAsState()
-    val error = registerViewModel.error.collectAsState()
+    val sendSuccess = forgetViewModel.sendSuccess.collectAsState()
+    val sendFailed = forgetViewModel.sendFailed.collectAsState()
+    val updateStatus = forgetViewModel.updateStatus.collectAsState()
 
     val textWidth = 300.dp
     val textHeight = 54.dp
@@ -90,13 +88,13 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
             isSending = true
         }
     }
-    if (error.value == 1 || error.value == 2){
+    if (updateStatus.value == 1 || updateStatus.value == 2 || updateStatus.value == 3 || updateStatus.value == 4){
         AlertDialog(
-            onDismissRequest = { registerViewModel.setError() },
-            title = { Text("注册") },
-            text = { Text(if (error.value == 1) "验证码错误，请重试" else "邮箱已被注册，请更换邮箱") },
+            onDismissRequest = { forgetViewModel.setError() },
+            title = { Text(if (updateStatus.value == 1) "修改成功" else "忘记密码") },
+            text = { Text(if (updateStatus.value == 1) "修改成功" else if (updateStatus.value == 2) "账号不存在" else if (updateStatus.value == 3) "验证码错误" else "更新失败请重试或者检查网络")},
             confirmButton = {
-                Button(onClick = { registerViewModel.setError() }) {
+                Button(onClick = { forgetViewModel.setError() }) {
                     Text("确定")
                 }
             }
@@ -104,37 +102,22 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
     }
     if (sendFailed.value){
         AlertDialog(
-            onDismissRequest = { registerViewModel.setSendFailed() },
+            onDismissRequest = { forgetViewModel.setSendFailed() },
             title = { Text("发送错误") },
             text = { Text("验证码发送错误，请检查网络重试。") },
             confirmButton = {
-                Button(onClick = { registerViewModel.setSendFailed() }) {
+                Button(onClick = { forgetViewModel.setSendFailed() }) {
                     Text("确定")
                 }
             }
         )
     }
 
-    if (registerFailed.value){
-        AlertDialog(
-            onDismissRequest = { registerViewModel.setRegisterFailed() },
-            title = { Text("注册失败") },
-            text = { Text("注册失败，请检查验证码是否正确或者网络。") },
-            confirmButton = {
-                Button(onClick = { registerViewModel.setRegisterFailed() }) {
-                    Text("确定")
-                }
-            }
-        )
-    }
-    LaunchedEffect (registerSuccess.value){
-        if (registerSuccess.value)
+
+    LaunchedEffect (updateStatus.value){
+        if (updateStatus.value == 1)
         {
-            navController.navigate("DocumentPage"){
-                popUpTo("RegisterPage"){
-                    inclusive = true
-                }
-            }
+            navController.popBackStack()
         }
     }
 
@@ -167,7 +150,7 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "注册",
+                    text = "忘记密码",
                     modifier = Modifier.align(Alignment.Center),
                     fontSize = 32.sp,
                     fontFamily = FontFamily(Font(R.font.cute)),
@@ -316,7 +299,7 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
                                         showDialog = true
                                     } else {
                                         isSending = true
-                                        registerViewModel.sendMail(email = account)
+                                        forgetViewModel.sendMail(email = account)
                                     }
                                 }
                             }, shape = RoundedCornerShape(0.dp),
@@ -381,7 +364,7 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
             AlertDialog(
                 onDismissRequest = { showDialog = false },
                 title = { Text("错误") },
-                text = { Text("邮箱地址无效或已经被注册，请输入正确的邮箱地址。") },
+                text = { Text("邮箱地址无效，请输入正确的邮箱地址。") },
                 confirmButton = {
                     Button(onClick = { showDialog = false }) {
                         Text("确定")
@@ -393,7 +376,7 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
         Spacer(modifier = Modifier.height(48.dp))
         Button(
             onClick = {
-                registerViewModel.register(account,password,inputCaptcha)
+                forgetViewModel.register(account,password,inputCaptcha)
             },
             shape = RoundedCornerShape(0.dp),
             modifier = Modifier
@@ -403,7 +386,7 @@ fun RegisterPage(navController: NavController, registerViewModel: RegisterViewMo
             colors = ButtonDefaults.buttonColors(containerColor = Color("#22222f".toColorInt()))
         ) {
             Text(
-                text = "立即注册",
+                text = "修改密码",
                 modifier = Modifier.align(Alignment.CenterVertically),
                 fontSize = 28.sp,
                 fontFamily = FontFamily(Font(R.font.cute)),

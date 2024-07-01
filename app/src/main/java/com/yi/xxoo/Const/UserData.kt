@@ -5,7 +5,7 @@ import com.yi.xxoo.utils.RoomUtils.stringToPersonalBestRecord
 
 object UserData {
     var name : String = ""
-    var account : String = "1357587070@qq.com"
+    var account : String = ""
     var password : String = ""
     var coin : Int = 0
     var email : String = ""

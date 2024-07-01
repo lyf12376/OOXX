@@ -37,16 +37,20 @@ class DocumentViewModel @Inject constructor(private val userService: UserService
     fun updateAvatar(file:File) {
         if (GameMode.isNetworkEnabled){
             try {
-                val requestFile: RequestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
-                val body: MultipartBody.Part = MultipartBody.Part.createFormData("avatar", file.name, requestFile)
                 viewModelScope.launch {
                     withContext(Dispatchers.IO){
-                        val userResponse = userService.updateUserAvatar(UserData.account,body)
-                        if (userResponse.code == 200){
-                            UserData.photo = userResponse.data
-                            _editSuccess.value ++
-                        }else{
-                            _avatarFailed.value = true
+                        try {
+                            val requestFile: RequestBody = file.asRequestBody("image/*".toMediaTypeOrNull())
+                            val body: MultipartBody.Part = MultipartBody.Part.createFormData("avatar", file.name, requestFile)
+                            val userResponse = userService.updateUserAvatar(UserData.account,body)
+                            if (userResponse.code == 200){
+                                UserData.photo = userResponse.data
+                                _editSuccess.value ++
+                            }else{
+                                _avatarFailed.value = true
+                            }
+                        }catch (e:Exception){
+                            e.printStackTrace()
                         }
                     }
                 }
@@ -57,10 +61,15 @@ class DocumentViewModel @Inject constructor(private val userService: UserService
             try {
                 viewModelScope.launch {
                     withContext(Dispatchers.IO){
-                        userDao.updateUserPhoto(UserData.account,file.absolutePath)
-                        UserData.photo = file.absolutePath
-                        _editSuccess.value ++
-                        Log.d("TAG", "updateAvatar: ${file.absolutePath}")
+                        try {
+                            userDao.updateUserPhoto(UserData.account,file.absolutePath)
+                            UserData.photo = file.absolutePath
+                            _editSuccess.value ++
+                            Log.d("TAG", "updateAvatar: ${file.absolutePath}")
+                        }catch (e:Exception){
+                            e.printStackTrace()
+                        }
+
                     }
                 }
             }catch (e:Exception){

@@ -35,6 +35,7 @@ import com.yi.xxoo.Const.OnlineGame
 import com.yi.xxoo.Const.Settlement
 import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
+import com.yi.xxoo.navigation.Screen
 import com.yi.xxoo.page.preparePage.AnimatedComponentLeft
 import com.yi.xxoo.page.preparePage.AnimatedComponentRight
 import com.yi.xxoo.utils.GifImage
@@ -81,7 +82,9 @@ fun SettlePage(navController: NavController,settleViewModel: SettleViewModel = h
         Box(modifier = Modifier
             .fillMaxSize()
             .navigationBarsPadding()) {
-            Button(onClick = { navController.popBackStack() }, modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)) {
+            Button(onClick = { navController.navigate(Screen.MatchPage.route){
+                popUpTo(Screen.MatchPage.route)
+            } }, modifier = Modifier.align(Alignment.BottomCenter).padding(16.dp)) {
                 Text(text = "返回大厅", fontSize = 24.sp)
             }
         }

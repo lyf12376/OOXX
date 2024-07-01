@@ -35,7 +35,7 @@ import com.yi.xxoo.Room.history.GameHistory
 
 @Composable
 fun GameHistoryPage(navController: NavController, gameHistoryViewModel: GameHistoryViewModel = hiltViewModel()) {
-    val gameHistory = gameHistoryViewModel.gameHistory.collectAsState()
+    val gameHistory = gameHistoryViewModel.historyList.collectAsState()
 
     Column(modifier = Modifier
         .fillMaxSize()
@@ -82,7 +82,10 @@ fun HistoryItem(gameHistory: GameHistory)
         Spacer(modifier = Modifier.weight(1f))
         Box(modifier = Modifier
             .padding(8.dp)
-            .background(if (gameHistory.state == 1) Color.Green else Color.Red, RoundedCornerShape(8.dp))
+            .background(
+                if (gameHistory.state == 1) Color.Green else Color.Red,
+                RoundedCornerShape(8.dp)
+            )
             ){
             Text(text = if (gameHistory.state == 1)"胜利" else "失败",modifier = Modifier.padding(8.dp), fontSize = 18.sp)
         }

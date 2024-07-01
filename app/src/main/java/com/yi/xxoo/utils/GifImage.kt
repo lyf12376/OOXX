@@ -30,7 +30,7 @@ fun GifImage(modifier: Modifier, imageId : Int) {
         painter = //淡出效果
         rememberAsyncImagePainter(
             ImageRequest.Builder(LocalContext.current).data(data = imageId)
-                .apply<ImageRequest.Builder>(block = fun ImageRequest.Builder.() {
+                .apply(block = fun ImageRequest.Builder.() {
                     crossfade(true)//淡出效果
                 }).build(), imageLoader = imageLoader
         ),

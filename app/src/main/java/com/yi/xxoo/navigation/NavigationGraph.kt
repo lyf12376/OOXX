@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.yi.xxoo.page.achievementPage.AchievementPage
 import com.yi.xxoo.page.documentPage.DocumentPage
+import com.yi.xxoo.page.forgetPage.ForgetPage
 import com.yi.xxoo.page.gameHistoryPage.GameHistoryPage
 import com.yi.xxoo.page.offlineGamePage.OfflineGamePage
 import com.yi.xxoo.page.levelPage.LevelPage
@@ -18,6 +19,7 @@ import com.yi.xxoo.page.onlineGamePage.OnlineGamePage
 import com.yi.xxoo.page.preparePage.PreparePage
 import com.yi.xxoo.page.rankPage.RankPage
 import com.yi.xxoo.page.registerPage.RegisterPage
+import com.yi.xxoo.page.rulePgae.RulePage
 import com.yi.xxoo.page.settlePage.SettlePage
 import com.yi.xxoo.page.statisticPage.StatisticPage
 
@@ -74,6 +76,12 @@ fun NavigationGraph(
         }
         composable(Screen.GameHistoryPage.route){
             GameHistoryPage(navController = navHostController)
+        }
+        composable(Screen.ForgetPage.route){
+            ForgetPage(navController = navHostController)
+        }
+        composable(Screen.RulePage.route){
+            RulePage(navController = navHostController)
         }
     }
 }

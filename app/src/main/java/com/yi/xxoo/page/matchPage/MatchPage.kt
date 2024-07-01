@@ -27,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.rememberRipple
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.graphics.toColorInt
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import com.github.compose.waveloading.DrawType
 import com.github.compose.waveloading.WaveLoading
@@ -61,8 +63,6 @@ import com.yi.xxoo.utils.RippleButton
 import com.yi.xxoo.utils.RippleButton.clearRipples
 import com.yi.xxoo.utils.RippleButton.emitPress
 import com.yi.xxoo.utils.RippleButton.emitRelease
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -73,14 +73,50 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
     val matchSuccess = matchViewModel.matched.collectAsState()
     val startGame = matchViewModel.startGame.collectAsState()
     val isUserAccept = matchViewModel.accept.collectAsState()
+    val currentBackStackEntry by navController.currentBackStackEntryAsState()
+    val rejected = matchViewModel.rejected.collectAsState()
+    val enemyRejected = matchViewModel.enemyRejected.collectAsState()
+    val isAcceptedAnimationVisible = matchViewModel.isAcceptedAnimationVisible.collectAsState()
+    val rejectDialog = matchViewModel.rejectDialog.collectAsState()
     val progress = remember {
         Animatable(1f)
+    }
+    LaunchedEffect (rejected.value,enemyRejected.value){
+        if (enemyRejected.value) {
+            if (rejected.value) {
+                matchViewModel.stopMatching()
+            }else{
+                matchViewModel.matchCancel()
+            }
+        }
     }
     LaunchedEffect (startGame.value){
         if (startGame.value) {
             Log.d("TAG", "MatchPage: 13213")
+            // 打印整个导航栈
             navController.navigate("PreparePage"){
                 popUpTo("MatchPage")
+            }
+        }
+    }
+
+    val delayTimes = remember {
+        mutableStateOf(0)
+    }
+    LaunchedEffect(isAcceptedAnimationVisible.value) {
+        if (isAcceptedAnimationVisible.value){
+            while (true){
+                delay(1000L)
+                delayTimes.value++
+                if (delayTimes.value >= 10){
+                    matchViewModel.rejectMatch()
+                    delayTimes.value = 0
+                    break
+                }
+                if (isUserAccept.value){
+                    delayTimes.value = 0
+                    break
+                }
             }
         }
     }
@@ -92,18 +128,17 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
             matchViewModel.connectSocket()
             Log.d("TAG", "MatchPage: ${matchResponse.data}")
         }
-
     }
 
     val scope = rememberCoroutineScope()
     var animationJob: Job? by remember { mutableStateOf(null) }
 
-    LaunchedEffect(isUserAccept.value) {
-        if (isUserAccept.value) {
+    LaunchedEffect(isAcceptedAnimationVisible.value,isUserAccept.value) {
+        if (isAcceptedAnimationVisible.value&&isUserAccept.value.not()) {
+            progress.snapTo(1f)
             matchViewModel.stopTimer()
             Log.d("TAG", "MatchPage: 1324564654564564156")
             animationJob = scope.launch {
-                progress.snapTo(1f)
                 progress.animateTo(
                     targetValue = 0f,
                     animationSpec = tween(
@@ -111,10 +146,13 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
                     )
                 )
             }
-        } else {
+        }
+        else if (isAcceptedAnimationVisible.value&&isUserAccept.value){
+            Log.d("TAG", "MatchPage: cancelAnim")
             animationJob?.cancel()
         }
     }
+
 
 
     Box(
@@ -182,8 +220,8 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
 
 
     //接受匹配动画
-    Box {
-        AnimatedVisibility(visible = matchSuccess.value) {
+    Box (Modifier.navigationBarsPadding()){
+        AnimatedVisibility(visible = isAcceptedAnimationVisible.value) {
             Column {
                 Box {
                     Box(
@@ -219,14 +257,19 @@ fun MatchPage(navController: NavController, matchViewModel: MatchViewModel = hil
                             )
                         }
                     }
+                    Box(modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp)){
+                        Button(onClick = { matchViewModel.rejectMatch() }, modifier = Modifier.align(Alignment.Center)) {
+                            Text(text = "拒绝匹配",fontSize = 36.sp,modifier = Modifier
+                                .padding(8.dp)
+                                .align(Alignment.CenterVertically))
+                        }
+                    }
 
                 }
 
-                Button(onClick = { matchViewModel.rejectMatch() }, modifier = Modifier.align(Alignment.CenterHorizontally)) {
-                    Text(text = "拒绝匹配",fontSize = 36.sp,modifier = Modifier
-                        .padding(8.dp)
-                        .align(Alignment.CenterVertically))
-                }
+
             }
 
         }
@@ -282,15 +325,15 @@ fun UserContent(name:String,rank:Int,photo:String) {
 fun RepeatingRippleButton(modifier: Modifier, matchViewModel: MatchViewModel = hiltViewModel()) {
     val interactionSource = remember { MutableInteractionSource() }
 
-    val isRunning by matchViewModel.isRunning.collectAsState()
+    val isButtonRippleAndTimerRunning = matchViewModel.isButtonRippleAndTimerRunning.collectAsState()
     var isRippleActive by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-    LaunchedEffect(isRunning) {
-        if (!isRunning) {
+    LaunchedEffect(isButtonRippleAndTimerRunning.value) {
+        if (!isButtonRippleAndTimerRunning.value) {
             interactionSource.clearRipples()
         }
-        while (isRunning) {
+        while (isButtonRippleAndTimerRunning.value) {
             interactionSource.emitPress()
             delay(500) // 控制波纹效果的频率
             interactionSource.emitRelease()
@@ -304,7 +347,7 @@ fun RepeatingRippleButton(modifier: Modifier, matchViewModel: MatchViewModel = h
                 .clip(RoundedCornerShape(24.dp)) // 使用 dp 而不是 float
                 .background(Color("#99EBFF".toColorInt()))
                 .clickable {
-                    if (isRunning) {
+                    if (isButtonRippleAndTimerRunning.value) {
                         matchViewModel.cancel()
                         matchViewModel.resetTimer()
                     } else {
@@ -330,9 +373,9 @@ fun RepeatingRippleButton(modifier: Modifier, matchViewModel: MatchViewModel = h
 @Composable
 fun TimerScreen(modifier: Modifier, matchViewModel: MatchViewModel = hiltViewModel()) {
     val time by matchViewModel.time.collectAsState()
-    val isRunning by matchViewModel.isRunning.collectAsState()
+    val isButtonRippleAndTimerRunning by matchViewModel.isButtonRippleAndTimerRunning.collectAsState()
 
-    AnimatedVisibility(visible = isRunning) {
+    AnimatedVisibility(visible = isButtonRippleAndTimerRunning) {
         Row(modifier) {
             Box(modifier = Modifier.fillMaxSize()) {
                 Text(

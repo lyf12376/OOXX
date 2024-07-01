@@ -28,4 +28,8 @@ sealed class Screen(val route:String, val description:String){
     object SettlePage:Screen("SettlePage","结算")
 
     object GameHistoryPage:Screen("GameHistoryPage","历史记录")
+
+    object ForgetPage:Screen("ForgetPage","忘记密码")
+
+    object RulePage:Screen("RulePage","规则")
 }

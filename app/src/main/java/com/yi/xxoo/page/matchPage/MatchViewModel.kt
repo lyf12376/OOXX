@@ -33,6 +33,26 @@ class MatchViewModel @Inject constructor(
     private val userDao: UserDao,
 ) : ViewModel() {
 
+    private val _isMatching = MutableStateFlow(false)
+    val isMatching:StateFlow<Boolean> = _isMatching
+
+    private val _isButtonRippleAndTimerRunning = MutableStateFlow(false)
+    val isButtonRippleAndTimerRunning:StateFlow<Boolean> = _isButtonRippleAndTimerRunning
+
+    private val _isAcceptedAnimationVisible = MutableStateFlow(false)
+    val isAcceptedAnimationVisible:StateFlow<Boolean> = _isAcceptedAnimationVisible
+
+    private val _rejectDialog = MutableStateFlow(false)
+    val rejectDialog = _rejectDialog.asStateFlow()
+
+    //找到游戏，显示接受动画
+    private val _findGame = MutableStateFlow(false)
+    val findGame = _findGame.asStateFlow()
+
+    fun cancelRejectDialog(){
+        _rejectDialog.value = false
+    }
+
     init {
         Log.d("TAG", ": creat")
     }
@@ -49,15 +69,12 @@ class MatchViewModel @Inject constructor(
     val time = _time.asStateFlow()
     private var timerJob = viewModelScope.launch { }
 
-    //是否开始匹配
-    private val _isRunning = MutableStateFlow(false)
-    val isRunning = _isRunning.asStateFlow()
 
     fun startTimer() {
-        if (_isRunning.value) return
-        _isRunning.value = true
+        if (_isButtonRippleAndTimerRunning.value) return
+        _isButtonRippleAndTimerRunning.value = true
         timerJob = viewModelScope.launch {
-            while (_isRunning.value) {
+            while (_isButtonRippleAndTimerRunning.value) {
                 delay(1000)
                 _time.value += 1
             }
@@ -65,12 +82,12 @@ class MatchViewModel @Inject constructor(
     }
 
     fun stopTimer(){
-        _isRunning.value = false
+        _isButtonRippleAndTimerRunning.value = false
         timerJob.cancel()
     }
 
     fun resetTimer() {
-        _isRunning.value = false
+        _isButtonRippleAndTimerRunning.value = false
         timerJob.cancel()
         _time.value = 0L
     }
@@ -78,7 +95,9 @@ class MatchViewModel @Inject constructor(
     private val _message = MutableStateFlow(MatchResponse(0, "", emptyList()))
     val message = _message.asStateFlow()
     fun matching() {
+        _isMatching.value = true
         //viewModelScope默认主线程
+        _message.value = MatchResponse(0, "", emptyList())
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 try {
@@ -94,6 +113,7 @@ class MatchViewModel @Inject constructor(
     }
 
     fun cancel() {
+        _isMatching.value = false
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 try {
@@ -110,11 +130,14 @@ class MatchViewModel @Inject constructor(
     private val _rejected = MutableStateFlow(false)
     val rejected: StateFlow<Boolean> = _rejected
 
+    private val _enemyRejected = MutableStateFlow(false)
+    val enemyRejected:StateFlow<Boolean> = _enemyRejected
+
     //双方都准备，准备开始游戏
     private val _startGame = MutableStateFlow(false)
     val startGame: StateFlow<Boolean> = _startGame
 
-    //用户接受，接之后变为false，用来显示动画
+    //用户接受
     private val _accept = MutableStateFlow(false)
     val accept :StateFlow<Boolean> = _accept
 
@@ -173,8 +196,9 @@ class MatchViewModel @Inject constructor(
             )
             _startGame.value = true
         }
-        if (message == "rejected") {
-            _rejected.value = true
+        if (message == "reject") {
+            SocketModule.disConnectSocket()
+            _enemyRejected.value = true
         }
     }
 
@@ -184,9 +208,28 @@ class MatchViewModel @Inject constructor(
     private val _matched = MutableStateFlow(false)
     val matched: StateFlow<Boolean> = _matched
 
+    fun stopMatching(){
+        _isMatching.value = false
+        _isAcceptedAnimationVisible.value = false
+        resetTimer()
+        _rejected.value = false
+        _enemyRejected.value = false
+        _accept.value = false
+        _rejectDialog.value = true
+    }
+
+    fun matchCancel(){
+
+        _isAcceptedAnimationVisible.value = false
+        _rejected.value = false
+        _enemyRejected.value = false
+        _accept.value = false
+        startTimer()
+        matching()
+    }
+
     fun matchSuccess(data: List<RankGameResult>) {
-        _matched.value = true
-        _accept.value = true
+        _isAcceptedAnimationVisible.value = true
         for (i in data) {
             if (i.userAccount != UserData.account) {
                 OnlineGame.enemyName = i.userName
@@ -197,13 +240,18 @@ class MatchViewModel @Inject constructor(
     }
 
     fun acceptedMatch() {
-        _accept.value = false
+        _accept.value = true
         sendMessage("accepted/${UserData.account}")
     }
 
     fun rejectMatch() {
-        _rejected.value = true
+        Log.e("TAG", "rejectMatch: ddddddddddddddd", )
         sendMessage("rejected/${UserData.account}")
+        _rejected.value = true
+//        _matched.value = false
+//        _accept.value = true
+//        resetTimer()
+//        _rejected.value = false
     }
 
 

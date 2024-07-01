@@ -24,7 +24,9 @@ object SocketModule {
     fun connect() {
         Log.d("TAG", "connect: ddddddddddddddddddddd")
         try {
-            socket = Socket("10.70.143.129", 6666).also { sock ->
+            //10.70.143.129
+            //106.52.31.86
+            socket = Socket("106.52.31.86", 6666).also { sock ->
                 out = PrintWriter(sock.getOutputStream(), true)
                 `in` = BufferedReader(InputStreamReader(sock.getInputStream()))
                 out!!.println(UserData.account)

@@ -3,10 +3,12 @@ package com.yi.xxoo.page.rankPage
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.Room.rank.passNum.PassNumRank
 import com.yi.xxoo.Room.rank.time.GameTimeRank
 import com.yi.xxoo.network.gameTime.GameTimeService
 import com.yi.xxoo.network.passNumRank.PassNumRankService
+import com.yi.xxoo.network.user.UserService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class RankViewModel @Inject constructor(
     private val passNumRankService: PassNumRankService,
-    private val gameTimeService: GameTimeService
+    private val gameTimeService: GameTimeService,
+    private val userService: UserService
 ) : ViewModel() {
 
     private val _passNumRankListFlow = MutableStateFlow<List<PassNumRank>>(emptyList())
@@ -41,9 +44,15 @@ class RankViewModel @Inject constructor(
                         _passNumRankListFlow.value = passNumRanks.data.toList()
                         Log.d("TAG", "fetchPassNumRankList: ${_passNumRankListFlow.value}")
                     }
+                    if (_passNumRankListFlow.value[0].userAccount == UserData.account) {
+                        UserData.achievement =
+                            "${UserData.achievement[0]}${UserData.achievement[1]}1"
+                        userService.updateAchievement(UserData.account,UserData.achievement)
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
+
             }
         }
     }
@@ -61,6 +70,12 @@ class RankViewModel @Inject constructor(
                     e.printStackTrace()
                 }
             }
+            if (_gameTimeRankListFlow.value[0].userAccount == UserData.account) {
+                UserData.achievement =
+                    "${UserData.achievement[0]}${UserData.achievement[1]}1"
+                userService.updateAchievement(UserData.account,UserData.achievement)
+            }
+            UserData.achievement = "${UserData.achievement[0]}${UserData.achievement[1]}1"
         }
     }
 }

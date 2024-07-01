@@ -145,7 +145,9 @@ fun OnlineGamePage(navController: NavController,onlineGameViewModel: OnlineGameP
                     showDialog = false
                     //退出游戏逻辑
                     onlineGameViewModel.exitGame()
-                    navController.popBackStack()
+                    navController.navigate(Screen.MatchPage.route){
+                        popUpTo(Screen.MatchPage.route)
+                    }
                 }) {
                     Text("确定")
                 }

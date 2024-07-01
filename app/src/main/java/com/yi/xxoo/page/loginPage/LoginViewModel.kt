@@ -64,7 +64,12 @@ class LoginViewModel @Inject constructor(private val savedUserDao: SavedUserDao,
             }else{
                 _registerOfflineAccount.value = true
                 userDao.createUser(User())
+                val user1 = userDao.login("offline","offline")
                 UserData.account = "offline"
+                UserData.email = "offline"
+                if (user1 != null) {
+                    UserData.setUser(user1)
+                }
             }
 
         }
@@ -89,6 +94,7 @@ class LoginViewModel @Inject constructor(private val savedUserDao: SavedUserDao,
                             _loginFailed.value = true
                         }
                     } catch (e: Exception) {
+                        _loginFailed.value = true
                         Log.d("TAG", "isLogin: ${e.message}")
                     }
                 }

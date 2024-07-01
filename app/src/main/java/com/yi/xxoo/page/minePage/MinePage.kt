@@ -43,6 +43,7 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.yi.xxoo.Const.GameMode
 import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.R
+import com.yi.xxoo.navigation.Screen
 import com.yi.xxoo.page.loginPage.noRippleClickable
 import kotlinx.coroutines.launch
 
@@ -56,14 +57,14 @@ object MySize {
 }
 
 @Composable
-fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltViewModel()) {
+fun MinePage(navController: NavController, mineViewModel: MineViewModel = hiltViewModel()) {
     val coroutineScope = rememberCoroutineScope()
     val systemUiController = rememberSystemUiController()
 
-    val showDialog = remember{
+    val showDialog = remember {
         mutableStateOf(false)
     }
-    if (showDialog.value){
+    if (showDialog.value) {
         AlertDialog(
             onDismissRequest = { showDialog.value = false },
             title = { Text("无法查看") },
@@ -75,7 +76,7 @@ fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltVie
             }
         )
     }
-    LaunchedEffect (true){
+    LaunchedEffect(true) {
         systemUiController.setSystemBarsColor(
             color = Color.Transparent,
             darkIcons = true
@@ -87,13 +88,15 @@ fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltVie
                 .background(Color(0xFFF0F0F0))
                 .fillMaxSize()
         ) {
-            Column (
+            Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .navigationBarsPadding()
                     .statusBarsPadding()
-            ){
-                photo()
+            ) {
+                photo {
+                    navController.navigate(Screen.DocumentPage.route)
+                }
                 Spacer(modifier = Modifier.height(32.dp))
                 achievement {
                     navController.navigate("AchievementPage")
@@ -106,7 +109,7 @@ fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltVie
                 rank {
                     if (GameMode.isNetworkEnabled)
                         navController.navigate("RankPage")
-                    else{
+                    else {
                         showDialog.value = true
                     }
                 }
@@ -115,10 +118,14 @@ fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltVie
                     navController.navigate("GameHistoryPage")
                 }
                 Divider()
+                rule {
+                    navController.navigate(Screen.RulePage.route)
+                }
+                Divider()
                 logOut {
                     UserData.resetUserData()
-                    navController.navigate("LoginPage"){
-                        popUpTo("MinePage"){
+                    navController.navigate("LoginPage") {
+                        popUpTo("MinePage") {
                             inclusive = true
                         }
                     }
@@ -127,26 +134,43 @@ fun MinePage(navController: NavController,mineViewModel: MineViewModel = hiltVie
         }
 
     }
-    Box(modifier = Modifier
-        .fillMaxSize()
-        .navigationBarsPadding()){
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .navigationBarsPadding()
+    ) {
         MinePageNavigation(
             Modifier
                 .align(Alignment.BottomCenter)
-                .background(Color.White)){
+                .background(Color.White)
+        ) {
             navController.navigate("LevelPage")
         }
     }
 }
 
 @Composable
-fun photo() {
-    Row (modifier = Modifier
-        .background(Color.White)
-        .fillMaxWidth()) {
-        AsyncImage(model = UserData.photo, contentDescription = "头像", modifier = Modifier
-            .padding(MySize.photoPadding)
-            .size(MySize.photoSize))
+fun photo(unit: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .background(Color.White)
+            .fillMaxWidth()
+    ) {
+        if (UserData.photo != "") {
+            AsyncImage(model = UserData.photo, contentDescription = "头像", modifier = Modifier
+                .padding(MySize.photoPadding)
+                .size(MySize.photoSize)
+                .clickable { unit() }
+            )
+        } else {
+            Image(painterResource(id = R.drawable.img),
+                contentDescription = "默认头像",
+                modifier = Modifier
+                    .padding(MySize.photoPadding)
+                    .size(MySize.photoSize)
+                    .clickable { unit() })
+        }
+
         Text(
             text = UserData.name, fontSize = MySize.nameSize, modifier = Modifier
                 .padding(MySize.ItemPadding)
@@ -156,7 +180,7 @@ fun photo() {
 }
 
 @Composable
-fun achievement(unit:()->Unit) {
+fun achievement(unit: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -191,7 +215,7 @@ fun achievement(unit:()->Unit) {
 }
 
 @Composable
-fun statistics(unit:()->Unit) {
+fun statistics(unit: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -226,8 +250,7 @@ fun statistics(unit:()->Unit) {
 }
 
 @Composable
-fun rank(unit:()->Unit)
-{
+fun rank(unit: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -263,8 +286,7 @@ fun rank(unit:()->Unit)
 }
 
 @Composable
-fun logOut(unit:()->Unit)
-{
+fun logOut(unit: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -299,8 +321,7 @@ fun logOut(unit:()->Unit)
 }
 
 @Composable
-fun history(unit: () -> Unit)
-{
+fun history(unit: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -334,11 +355,45 @@ fun history(unit: () -> Unit)
     }
 }
 
+@Composable
+fun rule(unit: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .clickable {
+                unit()
+            }
+    ) {
+        Image(
+            painterResource(id = R.drawable.rule),
+            contentDescription = "退出登录",
+            modifier = Modifier
+                .padding(MySize.ItemPadding)
+                .size(MySize.iconSize)
+        )
+        Text(
+            text = "游戏规则", fontSize = MySize.textSize, modifier = Modifier
+                .padding(MySize.ItemPadding)
+                .align(Alignment.CenterVertically)
+                .weight(1f)
+        )
+        Icon(
+            imageVector = Icons.Default.KeyboardArrowRight,
+            contentDescription = "更多",
+            modifier = Modifier
+                .padding(MySize.ItemPadding)
+                .size(MySize.iconSize)
+                .align(Alignment.CenterVertically),
+            tint = Color.Gray
+        )
+    }
+}
+
 
 @Composable
-fun MinePageNavigation(modifier: Modifier,unit:()->Unit)
-{
-    Row (modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround){
+fun MinePageNavigation(modifier: Modifier, unit: () -> Unit) {
+    Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
         Column {
             Icon(
                 painterResource(id = R.drawable.game),

@@ -8,9 +8,15 @@ import com.yi.xxoo.Const.GameMode
 import com.yi.xxoo.Const.UserData
 import com.yi.xxoo.Room.game.Game
 import com.yi.xxoo.Room.game.GameDao
+import com.yi.xxoo.Room.history.GameHistory
+import com.yi.xxoo.Room.history.GameHistoryDao
+import com.yi.xxoo.Room.rank.passNum.PassNumRank
+import com.yi.xxoo.Room.rank.time.GameTimeRank
 import com.yi.xxoo.Room.rank.worldBest.WorldBestRecord
 import com.yi.xxoo.Room.rank.worldBest.WorldBestRecordDao
 import com.yi.xxoo.Room.user.UserDao
+import com.yi.xxoo.network.gameTime.GameTimeService
+import com.yi.xxoo.network.passNumRank.PassNumRankService
 import com.yi.xxoo.network.user.UserService
 import com.yi.xxoo.network.worldBest.WorldBestService
 import com.yi.xxoo.utils.RoomUtils.personalBestRecordToString
@@ -20,9 +26,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDateTime
 import javax.inject.Inject
+
 
 @HiltViewModel
 class OfflineGameViewModel @Inject constructor(
@@ -30,7 +39,10 @@ class OfflineGameViewModel @Inject constructor(
     private val worldBestRecordDao: WorldBestRecordDao,
     private val userDao: UserDao,
     private val userService: UserService,
-    private val worldBestService: WorldBestService
+    private val worldBestService: WorldBestService,
+    private val gameHistoryDao: GameHistoryDao,
+    private val passNumRankService: PassNumRankService,
+    private val gameTimeService: GameTimeService
 ) : ViewModel() {
 
     private var gamesSize = 0
@@ -63,9 +75,16 @@ class OfflineGameViewModel @Inject constructor(
         try {
             viewModelScope.launch {
                 withContext(Dispatchers.IO) {
-                    val worldBestResponse = worldBestService.getWorldBestByLevel(level)
-                    _worldBest.value =
-                        "${worldBestResponse.data.time}   ${worldBestResponse.data.userName}"
+                    try {
+                        val worldBestResponse = worldBestService.getWorldBestByLevel(level-1).firstOrNull()
+                        if (worldBestResponse != null) {
+                            _worldBest.value =
+                                "${worldBestResponse.data.time}   ${worldBestResponse.data.userName}"
+                        }
+                    }catch (e:Exception){
+                        e.printStackTrace()
+                    }
+
                 }
             }
         } catch (e: Exception) {
@@ -91,7 +110,6 @@ class OfflineGameViewModel @Inject constructor(
     fun getGame(level: Int) {
         viewModelScope.launch {
             gameList.collect { games ->
-
                 if (games.isNotEmpty() && level - 1 < games.size) {
                     _gameDetail.value = games[level - 1]
                 } else {
@@ -106,7 +124,51 @@ class OfflineGameViewModel @Inject constructor(
         viewModelScope.launch {
             Log.d("TAG", "check: $now \n $target")
             if (now == target) {
+                if (!GameMode.isNetworkEnabled) {
+                    val time1 = LocalDateTime.now()
+                    val year = time1.year
+                    val month = time1.monthValue
+                    val day = time1.dayOfMonth
+                    val hour = time1.hour
+                    val minute = time1.minute
+                    val second = time1.second
+                    gameHistoryDao.insertGameHistory(
+                        GameHistory(
+                            userAccount = "offline",
+                            gameId = "$level",
+                            startTime = "$year-$month-$day $hour:${if (minute <= 9) "0$minute" else minute}:${if (second <= 9) "0$second" else second}",
+                            gameTime = time.toString(),
+                            state = 1
+                        )
+                    )
+                }
+                if (GameMode.isNetworkEnabled)
+                    withContext(Dispatchers.IO){
+                        try {
+                            worldBestService.insertWorldBest(
+                                WorldBestRecord(
+                                    level,
+                                    UserData.account,
+                                    UserData.name,
+                                    time
+                                )
+                            )
+                            gameTimeService.updateGameTimeRank(GameTimeRank(id = 1,userAccount = UserData.account, userName = UserData.name, gameTime = UserData.time))
+                        }catch (e:Exception){
+                            e.printStackTrace()
+                        }
+                    }
                 UserData.time += time
+                if (UserData.time >= 600) {
+                    UserData.achievement = "1" + UserData.achievement[1] + UserData.achievement[2]
+                    withContext(Dispatchers.IO) {
+                        try {
+                            userService.updateAchievement(UserData.account, UserData.achievement)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    }
+                }
                 UserData.gameTimes++
                 withContext(Dispatchers.IO) {
                     try {
@@ -116,8 +178,8 @@ class OfflineGameViewModel @Inject constructor(
                         Log.d("TAG", "check: ${e.message}")
                     }
                 }
-                if (UserData.bestRecord.size == 0){
-                    for (i in 0 until gamesSize){
+                if (UserData.bestRecord.size == 0) {
+                    for (i in 0 until gamesSize) {
                         UserData.bestRecord.add(0)
                     }
                 }
@@ -132,14 +194,6 @@ class OfflineGameViewModel @Inject constructor(
                     if (GameMode.isNetworkEnabled) {
                         withContext(Dispatchers.IO) {
                             try {
-                                worldBestService.insertWorldBest(
-                                    WorldBestRecord(
-                                        level,
-                                        UserData.account,
-                                        UserData.name,
-                                        time
-                                    )
-                                )
                                 userService.updateBestRecord(
                                     UserData.email,
                                     UserData.bestRecord.personalBestRecordToString()
@@ -157,6 +211,30 @@ class OfflineGameViewModel @Inject constructor(
                 if (UserData.passNum == level - 1) {
                     userDao.updateUserPassNum(level, UserData.email)
                     UserData.passNum = level
+                    if (UserData.passNum >= 3) {
+                        UserData.achievement =
+                            UserData.achievement[0] + "1" + UserData.achievement[2]
+                        userDao.updateUserAchievement(UserData.account, UserData.achievement)
+                        if (GameMode.isNetworkEnabled)
+                            withContext(Dispatchers.IO) {
+                                try {
+                                    userService.updateAchievement(
+                                        UserData.account,
+                                        UserData.achievement
+                                    )
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+
+                    }
+                    withContext(Dispatchers.IO){
+                        try {
+                            passNumRankService.updatePassNumRank(PassNumRank(id = 1, userAccount = UserData.account, userName = UserData.name, passNum = UserData.passNum))
+                        }catch (e:Exception){
+                            e.printStackTrace()
+                        }
+                    }
                     userDao.updateUserCoin(UserData.email, UserData.coin + 10)
                     UserData.coin += 10
                     if (GameMode.isNetworkEnabled) {
